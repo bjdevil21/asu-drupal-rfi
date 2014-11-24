@@ -1,7 +1,13 @@
 name = ASU RFI
 description = ASU RFI Form module.
 core = 7.x
-package = ASUO
+package = ASU
 dependencies[] = multiblock
+dependencies[] = views
+dependencies[] = views_data_export
+dependencies[] = asu_rfi_feature
+dependencies[] = mimemail
+dependencies[] = asu_eadvisor_degree_feed_feature
 ;files[] = asu_rfi.email.inc
+;files[] = asu_rfi.pages.inc
 ;scripts[] = asu_rfi.js
