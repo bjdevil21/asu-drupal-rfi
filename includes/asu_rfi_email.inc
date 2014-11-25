@@ -160,6 +160,9 @@ function asu_rfi_email($prog_plan, $e_email){
              }
                 
             }
+	    else{
+	     $mari = '';
+	    }
 
             $map = "<br /><strong><i> Listing of Required Courses: </i> </strong> <br /><a href= ".$major_map."> <br /><strong> View major map </strong> </a><br /><br />";
             
@@ -257,11 +260,13 @@ if(!empty($prog_plan)){
     $MimeMailSystem = drupal_mail_system($my_module, $my_mail_token);
     $default_from = variable_get('site_mail', ini_get('sendmail_from'));
     $message = array(
-	   'id' => $my_module . '_' . $my_mail_token,
+            'module' => 'mimemail',
+	    'id' => $my_module . '_' . $my_mail_token,
 	    'from' => $from,
 	    'key' => '',
 	    'subject' => $params['subject'],
 	    'body' => array($params['body']),
+	    'to' => $to,  
 	    'headers' => array(
               'From' => $from,
               'Sender' => $from,

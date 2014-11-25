@@ -317,7 +317,10 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   //validate zip code
   if(isset($zip)){
    if( !preg_match("/^[0-9\._-\s]+$/",$zip)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('Zipcode', t('Zipcode accepts only numbers'));
+    }
+    if((strlen($zip) > 9)){
+	form_set_error('Zipcode', t('Zipcode cannot be longer than 9 digits'));
     }
   }
     
@@ -496,7 +499,7 @@ function asu_rfi_second_form($form, &$form_state){
   
     $form['markup'] = array(
 	'#type' => 'item',
-	'#markup' => '<div style="background: green; padding:2%;"><strong>Thank you for your interest in Arizona State University!</strong> We will send you information that matches your unique interests. If you would like additional information, please specify below.</div>',
+	'#markup' => '<div style="background: green; padding:2%; color: #ffffff !important;"><strong>Thank you for your interest in Arizona State University!</strong> We will send you information that matches your unique interests. If you would like additional information, please specify below.</div>',
     );
     
     $form['citizenship'] = array(
@@ -508,6 +511,7 @@ function asu_rfi_second_form($form, &$form_state){
      '#type' => 'radios',
      '#title' => t('Veteran admission information and services'),
      '#options' =>  array(
+	                  "None" => "None",
 			  "Active Duty" => "Active Duty",
 			  "National Guard" => "National Guard",
 			  "Veteran" => "Veteran",
@@ -555,7 +559,7 @@ function asu_rfi_second_form($form, &$form_state){
     
     $form['questions'] = array(
         '#type' => 'textarea',
-        '#title' => t('I also need assintance with the following - limit 255 characters'),
+        '#title' => t('I also need assistance with the following - limit 255 characters'),
         '#cols' => 60,
         '#resizable' => TRUE,
         '#rows' => 5,
@@ -683,6 +687,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
    //if the form submissions are for graduate, dont clear sessions at this point. They will be cleared after getting the salesforce response
    if($form_state['storage']['prospect_level'] == "Graduate"){
      asu_rfi_grad_post($form_state['storage']);
+     unset($_SESSION['rfi_data']);
    }
    
    //If the form submissions are for undergraduate, clear session variables
@@ -855,6 +860,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
 	'#default_value' =>  isset($_SESSION['rfi_data']['country']) ? $_SESSION['rfi_data']['country'] : NULL,
     );
     
+   //include modal help text for date of birth
     $modal_data = '<!-- Button trigger modal -->
  <span class="fa fa-info-circle" data-toggle="modal" data-target="#myModal">
   <strong>?</strong>
@@ -907,6 +913,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
      '#type' => 'radios',
      '#title' => t('Veteran admission information and services'),
      '#options' =>  array(
+	    		  "None" => "None",
 			  "Active Duty" => "Active Duty",
 			  "National Guard" => "National Guard",
 			  "Veteran" => "Veteran",
@@ -950,7 +957,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
      
      $form['questions'] = array(
         '#type' => 'textarea',
-        '#title' => t('I also need assintance with the following - limit 255 characters'),
+        '#title' => t('I also need assistance with the following - limit 255 characters'),
         '#cols' => 60,
         '#resizable' => TRUE,
         '#rows' => 5,
@@ -1027,8 +1034,11 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   }
   //validate zip code
   if(isset($zip)){
-   if(!preg_match("/^[0-9\._-\s]+$/",$zip)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+    if( !preg_match("/^[0-9\._-\s]+$/",$zip)){
+        form_set_error('Zipcode', t('Zipcode accepts only numbers'));
+    }
+    if((strlen($zip) > 9)){
+	form_set_error('Zipcode', t('Zipcode cannot be longer than 9 digits'));
     }
   }
     
@@ -1083,12 +1093,12 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
 	$form_state['values']['prospect_level'] = "Graduate";
 	//Set session variables only for grad students so that if Salesforce sends error message, users will have submitted data
 	 $_SESSION['rfi_data'] = $form_state['values'];
-    }
+     }
     else{
 	$stype = $form_state['values']['stu_type'];
 	$long_form_type = "Undergraduate long form";
 	$form_state['values']['prospect_level'] = "Undegraduate";
-    }
+   }
    $fname = $form_state['values']['first_name'];
    $lname = $form_state['values']['last_name'];
    $email = $form_state['values']['email'];
@@ -1234,7 +1244,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
 
   $form_state['values']['submission_nodeid'] = $entity->nid;
 
- // form_load_include($form_state, 'inc', 'asu_rfi', 'includes/asu_rfi_email');
+ //send the confirmation email
   asu_rfi_email($program, $email);
   
   if($form_state['values']['prospect_level'] == "Graduate"){
@@ -1408,7 +1418,7 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
     }
 }
 
-/* submit handler */
+/* submit handler of current students form*/
 function asu_rfi_current_form_data_submit($form, &$form_state){
    global $user;
   
@@ -1430,8 +1440,8 @@ function asu_rfi_current_form_data_submit($form, &$form_state){
    $program = $form_state['values']['prog_plan']; 
    $uniqueid = $email.$program ;
   
-  //Query database to get program name based on the program code submitted in the form
- $program_name = db_query('select field_asu_degree_major_value from field_data_field_asu_degree_major mj join field_data_field_asu_degree_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_degree_plan_value = :plan', array(':plan' => $program))->fetchField();
+   //Query database to get program name based on the program code submitted in the form
+   $program_name = db_query('select field_asu_degree_major_value from field_data_field_asu_degree_major mj join field_data_field_asu_degree_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_degree_plan_value = :plan', array(':plan' => $program))->fetchField();
  
   //Create node
    $ent_values = array(
