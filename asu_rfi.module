@@ -144,9 +144,9 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
        $block['content'] = asu_rfi_form($delta);
      }
    
-   //RFI long form settings
+   //Undergrad long form settings
   //Only array keys are passed, so load all programs and compare with saved instance setting using array_intersect_key function
-  if(($instance_settings['form_type'] == 'ugrad_longform')){
+  if(($instance_settings['form_type'] == 'ugrad_longform') || ($instance_settings['form_type'] == 'current_undergrad_form')){
      $program_options = asu_rfi_get_undergrad_programs();
      if(!empty($instance_settings['programs'])){
        $programs = array_intersect_key($program_options,  array_flip($instance_settings['programs']));
@@ -156,7 +156,9 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
        $programs = $program_options;
      }
   }
-  if(($instance_settings['form_type'] == 'graduate_longform')){
+  
+  //grad long form settings
+  if(($instance_settings['form_type'] == 'graduate_longform') || ($instance_settings['form_type'] == 'current_grad_form')){
     $program_options = asu_rfi_get_grad_programs();
     if(!empty($instance_settings['grad_programs'])){
        $programs = array_intersect_key($program_options,  array_flip($instance_settings['grad_programs']));
@@ -167,6 +169,7 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
   }
   
   
+  
    if(($instance_settings['form_type'] == 'ugrad_longform') || ($instance_settings['form_type'] == 'graduate_longform')){
      $form_type = $instance_settings['form_type'];
       $block['subject'] = t('Future Student Form');
@@ -174,6 +177,17 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
       // TODO Load the RFI form in this block.
       $block['content'] = asu_rfi_long_form($delta, $programs, $form_type);
      }
+     
+    //current student form settings
+  
+    if(($instance_settings['form_type'] == 'current_undergrad_form') || ($instance_settings['form_type'] == 'current_grad_form')){
+       $form_type = $instance_settings['form_type'];
+       $block['subject'] = t('Current Student Form');
+      module_load_include('inc', 'asu_rfi', 'includes/asu_rfi.pages');
+      // TODO Load the RFI form in this block.
+      $block['content'] = asu_rfi_current_form($delta, $programs, $form_type);
+    }
+  
      break;
   }
 
@@ -230,6 +244,14 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
   else{
   }
      
+      //Form type configuration
+      /*$form_types = array(
+                          'multiform' => 'Multi step form (This form will be shown only on degree pages)',
+                          'ugrad_longform' => 'Undergraduate Long form',
+                          'graduate_longform' => 'Graduate Long form',
+                          'current_undergrad_form' => 'Current undergrad form',
+                          'current_grad_form' => 'Current Grad form'
+                          );*/
       $form_type_settings = $instance_settings['form_type'] ? $instance_settings['form_type'] : NULL;
       $form['asu_rfi_form_block_type'] = array(
         '#type' => 'radios',
@@ -242,7 +264,6 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
       $program_settings = $instance_settings['programs'] ? $instance_settings['programs'] : NULL;
     
       $program_options = asu_rfi_get_undergrad_programs();
-      
      //undergrad programs list
       $form['asu_rfi_form_block_programs'] = array(
         '#type' => 'select',
@@ -264,7 +285,6 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
 	   ),
         ),
       );
-      
     //if grad degrees are available, populate the gard degrees field
     if(sizeof(variable_get('asu_rfi_graduate_degree_type')) > 0){
       $grad_program_settings = $instance_settings['grad_programs'] ? $instance_settings['grad_programs'] : NULL;
@@ -310,9 +330,7 @@ function asu_rfi_block_save($delta = '', $edit = array()) {
       //Below line added by Archana
       variable_set('asu_rfi_form_block_type'. $multi_id, $edit['asu_rfi_form_block_type']);
       variable_set('asu_rfi_form_block_programs' . $multi_id, $edit['asu_rfi_form_block_programs']);
-      if(isset($edit['asu_rfi_form_block_grad_programs'])){
-        variable_set('asu_rfi_form_block_grad_programs' . $multi_id, $edit['asu_rfi_form_block_grad_programs']);
-      }
+      variable_set('asu_rfi_form_block_grad_programs' . $multi_id, $edit['asu_rfi_form_block_grad_programs']);
     break;
   }
 }
@@ -470,8 +488,7 @@ function asu_rfi_cron() {
     variable_set('asu_rfi_cron_last_ran', time());
   }
 
-   /*EXAMPLE OF HOW WE COULD CATCH FAILED POSTINGS, AND RETRY THEM VIA CRON*/
-
+  
   // Check for unposted leads (confirmation == -1), and add them to the cron
   // queue.
 
@@ -496,7 +513,45 @@ function asu_rfi_cron() {
     }
 
   }
- 
+  
+  //check if the site hasn't posted submissions to salesforce for two days. If yes, send an email to administrator.
+   //Get last time site had successfull submission
+   $last_sf_success = variable_get('last_success_SF_posting', NULL); variable_set('last_success_SF_posting', time());
+   $last_sf_failure = variable_get('last_failure_SF_posting', NULL); 
+   $timediff = $last_sf_failure - $last_sf_success ;
+   
+   if($timediff > 17280){ //greater that two days
+         $to_email = variable_get('asu_rfi_error_email', NULL);
+         //send email to admin reporting the issue
+         $content = "The site ".$_SERVER['HTTP_HOST']." hasn\'t been submitting to Salesforce since 2 days";
+         $subject = "Failed submissions to Sales Force from ".$_SERVER['HTTP_HOST'];
+         $my_module = 'mimemail';
+         $my_mail_token = '';
+         $MimeMailSystem = drupal_mail_system($my_module, $my_mail_token);
+         $default_from = variable_get('site_mail', ini_get('sendmail_from'));
+         $emailmessage = array(
+	    'id' => $my_module . '_' . $my_mail_token,
+	    'from' => $default_from,
+	    'key' => '',
+	    'subject' => $subject,
+	    'body' => array($content),
+            'to' => $to_email,
+            'module' => 'mimemail',
+	    'headers' => array(
+              'From' => $default_from,
+              'Sender' => $default_from,
+              'Return-Path' => $default_from,
+	      'Content-Type' => 'text/html; charset=UTF-8;',
+	      'to' => $to_email 
+            ),
+	);
+	
+	$emailmessage = $MimeMailSystem->format($message);
+        if ($MimeMailSystem->mail($emailmessage)) {
+          watchdog('asu_rfi', 'SF Error message email sent to '.$to_email);
+          variable_set('SF_error_message_sent', time());
+        }
+   }
 
 }
 
@@ -553,7 +608,9 @@ function asu_rfi_repost_rfi($data) {
         $gradpost['prog_plan'] = $node->field_rfi_program['und'][0]['value'];
         $gradpost['comment'] = $node->field_rfi_question['und'][0]['value'];
         $gradpost['submission_nodeid'] = $node->nid;
-         asu_rfi_grad_post($gradpost);
+        // asu_rfi_grad_post($gradpost);
+        // watchdog('SF grad posting', "Posted successfully to ".$data->nid." from cron page");
+        
        }
      }
  
@@ -698,6 +755,8 @@ function asu_rfi_detect_browser() {
  * @return array where key is nid and value is program focus (program code +
  *   program plan code)
  *
+ * TODO Probably will want to remove, or edit to use new program gathering
+ * logic.
  */
 function asu_rfi_get_undergrad_programs() {
   
@@ -753,7 +812,7 @@ function asu_rfi_get_undergrad_programs() {
   return $out;
 }
 
-//Get grad programs if any exist
+//Gte grad programs if any exist
 function asu_rfi_get_grad_programs() {
 
  $query = new EntityFieldQuery();
@@ -827,7 +886,13 @@ function asu_rfi_determine_environment() {
   return $environ;
 }
 
-/* Implementation of hook_views_api to direct the views to custom views template path */
+
+
+/*********************************************************************
+DEVELOPER NOTES
+ *********************************************************************/
+
+
 function asu_rfi_views_api() {
   return array(
     'api' => 3,
@@ -846,11 +911,3 @@ function asu_rfi_js_alter(&$javascript) {
     $javascript['profiles/openasu/modules/contrib/jquery_update/replace/misc/1.7/states.js']['data'] = drupal_get_path('core','') . 'misc/states.js';
   }
 }
-
-
-
-
-/*********************************************************************
-DEVELOPER NOTES
- *********************************************************************/
-
