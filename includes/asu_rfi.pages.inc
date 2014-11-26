@@ -1241,7 +1241,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
   $ewrapper->field_rfi_prospect_level->set($form_state['values']['prospect_level']);
   
   $ewrapper->save();
-
+   unset($_SESSION['rfi_data']);
   $form_state['values']['submission_nodeid'] = $entity->nid;
 
  //send the confirmation email

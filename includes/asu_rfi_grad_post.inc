@@ -105,19 +105,23 @@ foreach($submission_data as $key_value => $result_array){
     }
 }
 
-// build the URL encoded
-$at = http_build_query($submission_data, '', '&');  
-   
-// post the data
-$options = array(
-                'method' => 'POST',
-                'data' => $at,
-                'timeout' => 90,
-                'headers' => $headers,
-                 );
-    
-$response = drupal_http_request($url, $options); // send the response
 
+      //url to post data to salesforce
+        $curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); //If you don't want to use any of the return information, set to false
+	curl_setopt($curl, CURLOPT_HEADER, TRUE); //Set this to false to remove informational headers
+	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $submission_data); //data mapping
+	curl_setopt($curl, CURLOPT_SSLVERSION, 1); //This will set the security protocol to TLSv1
+	
+	$response = curl_exec($curl);
+	
+	$info = curl_getinfo($curl); //Used by your drupal messages below
+	
+	curl_close($curl);
+	
+	dpm($info);
+	
 //Get the previous page node
 $destination = drupal_get_destination();
 
@@ -127,13 +131,13 @@ $destination = drupal_get_destination();
 //$goto_url = $base_url .'/'.$destination['destination'];
 
 
-if($response->code == 400) {
+if($info['http_code'] == 400) {
 
 		drupal_set_message( "Please fix the following issue and try submitting the form again:<br />" . $response->data, 'error');
                // drupal_goto($goto_url, $data_options );
                 $status = "Incomplete";
 }
-if($response->code == 500) {
+if($info['http_code'] == 500) {
 		drupal_set_message($response->data . "<br />We have an issue with our form, and we’re working on fixing it. We apologize for the inconvenience. In the meantime, please send an email to <a href='mailto:gograd@asu.edu'>gograd@asu.edu</a> about your interest in graduate studies, and we will be glad to get you the information you need to take your next steps. Thank you.", 'error');
 		 $status = "Pending";
                 // unset($_SESSION['rfi_data']);
@@ -142,7 +146,7 @@ if($response->code == 500) {
 
 
 //Get the response from Salesforce. If the submission is not successfull, update the previous submission status to Incomplete
-if(($response->code == 400) || ($response->code == 500)){
+if(($info['http_code'] == 400) || ($info['http_code'] == 500)){
     		
   $node_status_updated = db_update('field_data_field_rfi_submission_status') 
   ->fields(array(
@@ -166,7 +170,7 @@ if(($response->code == 400) || ($response->code == 500)){
   cache_clear_all($cid, 'cache_field');
 }
 
-if(($response->code == 200)){
+if(($info['http_code'] == 200)){
    // unset($_SESSION['rfi_data']);
     $node_status_updated = db_update('field_data_field_rfi_submission_status') 
   ->fields(array(

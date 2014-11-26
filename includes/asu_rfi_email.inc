@@ -20,8 +20,19 @@ function asu_rfi_email($prog_plan, $e_email){
            $name = $ball_arr["Descr100"];
            $degree = $ball_arr["Degree"];
            $desc  = $ball_arr["DescrlongExtns"];
-           $career = $ball_arr["AsuCareerOpp"];
-           $major_map =$ball_arr["AsuCritTrackUrl"];
+	   if(isset($ball_arr["AsuCareerOpp"])){
+	      $career = $ball_arr["AsuCareerOpp"];
+	   }
+	   else{
+	    $career = '';
+	   }
+           if(isset($ball_arr["AsuCritTrackUrl"])){
+	      $major_map = $ball_arr["AsuCritTrackUrl"];
+	   }
+	   else{
+	      $major_map = '';
+	   }
+           
            $prog_fee = $ball_arr["AsuProgramFee"];
            if($prog_fee == "N")
                  $prog_fee = "No";
@@ -32,7 +43,13 @@ function asu_rfi_email($prog_plan, $e_email){
                   $lang_require = "No";
             if($lang_require == "Y")
                   $lang_require = "Yes";
-                 $math_req = $ball_arr["MinMathReq"].". ";
+		  if(isset($ball_arr["MinMathReq"])){
+		      $math_req = $ball_arr["MinMathReq"].". ";
+		  }
+		  else{
+		    $math_req = '';
+		  }
+                
              if(gettype($ball_arr["asuAcadpMrfText"]) <> "array")
                 $asu_add_requ = $ball_arr["asuAcadpMrfText"];
 		if(isset($ball_arr["Reqdescr"])){
@@ -308,10 +325,15 @@ function asu_rfi_career($data){
              if(empty($median)){
                $median = "not available";
             }
-            $option[] = "<tr><td>".$careerdata_title."&nbsp;&nbsp;&nbsp;&nbsp;</td><td>".$growth."</td><td>". $median."</td></tr>";
+            $career_option[] = "<tr><td>".$careerdata_title."&nbsp;&nbsp;&nbsp;&nbsp;</td><td>".$growth."</td><td>". $median."</td></tr>";
          }
         }
-           
+     if(isset($career_option)){
+       $option = $career_option;
+     }
+     else{
+      $option = '';
+     }
      return $option;
 }
  
