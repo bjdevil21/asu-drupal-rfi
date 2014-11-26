@@ -2,7 +2,7 @@
 
 function asu_rfi_grad_post($data){
   global $base_url;
-
+  dpm($data);
   $fname = $data['first_name'];
   $lname = $data['last_name'];
   $email = $data['email'];
