@@ -662,7 +662,7 @@ function asu_rfi_form_alter(&$form, &$form_state, $form_id){
     global $user;
    if(($form['#id'] == "asu-rfi-form-data") || ($form['#id'] == "asu-rfi-long-form-data")){
    
-      if($rfi_mode = "test"){
+      if($rfi_mode == "test"){
          if(user_access('administer nodes', $user) == 1){
             return true;
          }
