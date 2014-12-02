@@ -39,7 +39,7 @@ function asu_rfi_admin_settings($form_state){
     '#description' => t("Specifiy the form authentication key from middle wear."),
     '#required' => TRUE,
     );
-    
+    */ 
      //Error notification email if submissions to Sales force failed for more than 2 days
     $form['asu_rfi_error_email'] = array(
     '#type' => 'textfield',
@@ -50,7 +50,7 @@ function asu_rfi_admin_settings($form_state){
     '#size' => 60, 
     '#maxlength' => 150,
     );
-    */
+   
     
     $form['asu_rfi_form_access']['asu_rfi_google_analytics_key'] = array(
     '#type' => 'textfield',

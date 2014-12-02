@@ -9,6 +9,7 @@
  /* Implementation of hook_int() ***/
 module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_email');
 module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_grad_post');
+//module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_undergrad_post');
 
  
 function asu_rfi_init() {
@@ -48,11 +49,11 @@ function asu_rfi_form_data($form, &$form_state) {
     $node = menu_get_object();
     if(isset($node)){
     $dcode = $node->title;
-    $dname = $node->field_asu_degree_major['und'][0]['value'];
+    $dname = $node->field_asu_degree_awarded['und'][0]['value'];
     $degree[$dcode] = $dname;
     $type_degree = $node->field_asu_degree_program['und'][0]['value'];
-    $college_code = $node->field_asu_degree_prog['und'][0]['value'];
-    $college_name = $node->field_asu_degree_diploma_descr['und'][0]['value'];
+    $college_code = $node->field_asu_academic_program['und'][0]['value'];
+    $college_name = $node->field_asu_diploma_description['und'][0]['value'];
    
     }
    
@@ -87,7 +88,7 @@ function asu_rfi_form_data($form, &$form_state) {
      '#collapsed' => FALSE,
     );
      
-    $form['my_interest']['stu_type'] = array(
+    $form['my_interest']['student_type'] = array(
      '#type' => 'select',
      '#title' => t('I will be a future'),
      '#options' => array('None'=>'Select type','First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
@@ -100,8 +101,8 @@ function asu_rfi_form_data($form, &$form_state) {
 	),
       ),
     
-     '#attributes' => array('class' => array('reqinfo_stu_type')),
-     '#default_value' =>  isset($_SESSION['rfi_data']['stu_type']) ? $_SESSION['rfi_data']['stu_type'] : NULL,
+     '#attributes' => array('class' => array('reqinfo_student_type')),
+     '#default_value' =>  isset($_SESSION['rfi_data']['student_type']) ? $_SESSION['rfi_data']['student_type'] : NULL,
     );
   
     
@@ -212,7 +213,7 @@ function asu_rfi_form_data($form, &$form_state) {
     
        $modal_data = '<!-- Button trigger modal -->
  <span class="fa fa-info-circle" data-toggle="modal" data-target="#myModal">
-  <strong>?</strong>
+  <!-- <strong>?</strong> -->
  </span>
 <!-- <i class="fa fa-info-circle" data-toggle="modal" data-target="#myModal"></i> -->
 
@@ -284,7 +285,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
  
  $degree_type = $form_state['values']['degree_type'];
   
-  $stype = $form_state['values']['stu_type'];
+  $stype = $form_state['values']['student_type'];
   $fname = $form_state['values']['first_name'];
   $lname = $form_state['values']['last_name'];
   $email = $form_state['values']['email'];
@@ -315,7 +316,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   //Validate student type and add css if empty if the form is in undergrad degree page
   if($degree_type == "undergrad"){
    if($stype == 'None'){
-   form_set_error('stu_type', t('I will be a future field is required'));
+   form_set_error('student_type', t('I will be a future field is required'));
    drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
    }
   }
@@ -418,15 +419,15 @@ function asu_rfi_form_data_submit($form, &$form_state){
   $form_state['storage']['prog_plan'] = check_plain($form_state['values']['prog_plan']);
  
   if(($form_state['values']['degree_type']) != "undergrad"){
-        $form_state['values']['stu_type'] = "Graduate";
+        $form_state['values']['student_type'] = "Graduate";
 	$form_state['storage']['student_type'] = "Graduate";
 	$multi_form_type = "Graduate multi form";
 	$form_state['storage']['prospect_level'] = "Graduate";
     }
     else{
-	$form_state['storage']['student_type'] = $form_state['values']['stu_type'];
+	$form_state['storage']['student_type'] = $form_state['values']['student_type'];
 	$multi_form_type = "Undergraduate multi form";
-	$form_state['storage']['prospect_level'] = "Undegraduate";
+	$form_state['storage']['prospect_level'] = "Undergraduate";
     }
   
   $form_state['storage']['ip_address'] =  $form_state['values']['ip_address'];
@@ -701,9 +702,10 @@ function asu_rfi_second_form_submit($form, &$form_state){
    }
    
    //If the form submissions are for undergraduate, clear session variables
+   
    if($form_state['storage']['prospect_level'] == "Undergraduate"){
     unset($_SESSION['rfi_data']);
-    // asu_rfi_undergrad_post($form_state['storage']); -- To be used in future
+     //asu_rfi_undergrad_post($form_state['storage']); //-- To be used in future
    }
    $coded_nid = base64_encode($node_entity_id);
    drupal_goto("degree-programs/request-info-thank-you/$coded_nid");
@@ -763,7 +765,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
      '#collapsed' => FALSE,
     );
      
-    $form['my_interest']['stu_type'] = array(
+    $form['my_interest']['student_type'] = array(
      '#type' => 'select',
      '#title' => t('I will be a future'),
      '#options' => array('None'=>'Select type','First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
@@ -776,8 +778,8 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
 	),
       ),
     
-     '#attributes' => array('class' => array('reqinfo_stu_type')),
-     '#default_value' =>  isset($_SESSION['rfi_data']['stu_type']) ? $_SESSION['rfi_data']['stu_type'] : NULL,
+     '#attributes' => array('class' => array('reqinfo_student_type')),
+     '#default_value' =>  isset($_SESSION['rfi_data']['student_type']) ? $_SESSION['rfi_data']['student_type'] : NULL,
     );
     
     
@@ -873,7 +875,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
    //include modal help text for date of birth
     $modal_data = '<!-- Button trigger modal -->
  <span class="fa fa-info-circle" data-toggle="modal" data-target="#myModal">
-  <strong>?</strong>
+ <!-- <strong>?</strong> -->
  </span>
 <!-- <i class="fa fa-info-circle" data-toggle="modal" data-target="#myModal"></i> -->
 
@@ -1000,7 +1002,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
 /* Function to validate submitted values*/
 
 function asu_rfi_long_form_data_validate($form,&$form_state){
-   $stype = $form_state['values']['stu_type'];
+   $stype = $form_state['values']['student_type'];
    $fname = $form_state['values']['first_name'];
    $fname = ucfirst($fname);
    $lname = $form_state['values']['last_name'];
@@ -1038,7 +1040,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   //Validate student type and add css if empty
   if($form_type == 'ugrad_longform'){
   if($stype == 'None'){
-    form_set_error('stu_type', t('I will be a future field is required'));
+    form_set_error('student_type', t('I will be a future field is required'));
     drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
    }
   }
@@ -1108,9 +1110,9 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
 	 $_SESSION['rfi_data'] = $form_state['values'];
      }
     else{
-	$stype = $form_state['values']['stu_type'];
+	$stype = $form_state['values']['student_type'];
 	$long_form_type = "Undergraduate long form";
-	$form_state['values']['prospect_level'] = "Undegraduate";
+	$form_state['values']['prospect_level'] = "Undergraduate";
    }
    $fname = $form_state['values']['first_name'];
    $lname = $form_state['values']['last_name'];
@@ -1194,14 +1196,14 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
    }
  
  //Query database to get program name based on the program code submitted in the form
- $program_name = db_query('select field_asu_degree_major_value from field_data_field_asu_degree_major mj join field_data_field_asu_degree_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_degree_plan_value = :plan', array(':plan' => $program))->fetchField();
+ $program_name = db_query('select field_asu_degree_awarded_value from field_data_field_asu_degree_awarded mj join field_data_field_asu_academic_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_academic_plan_value = :plan', array(':plan' => $program))->fetchField();
  
  //Get college code from database based on program code
- $college_code = db_query('select field_asu_degree_prog_value from field_data_field_asu_degree_prog prog join field_data_field_asu_degree_plan plan on prog.entity_id = plan.entity_id where plan.field_asu_degree_plan_value = :plancode', array(':plancode' => $program))->fetchField();
+ $college_code = db_query('select field_asu_academic_program_value from field_data_field_asu_academic_program prog join field_data_field_asu_academic_plan plan on prog.entity_id = plan.entity_id where plan.field_asu_academic_plan_value = :plancode', array(':plancode' => $program))->fetchField();
  
  
  //Get college name from database based on program code
- $college_name = db_query('select field_asu_degree_diploma_descr_value from field_data_field_asu_degree_diploma_descr progn join field_data_field_asu_degree_plan plann on progn.entity_id = plann.entity_id where plann.field_asu_degree_plan_value = :plancode', array(':plancode' => $program))->fetchField();
+ $college_name = db_query('select field_asu_diploma_description_value from field_data_field_asu_diploma_description progn join field_data_field_asu_academic_plan plann on progn.entity_id = plann.entity_id where plann.field_asu_academic_plan_value = :plancode', array(':plancode' => $program))->fetchField();
   //Create node
    $ent_values = array(
   'type' => 'asu_rfi',
@@ -1266,7 +1268,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
    
    
    if($form_state['values']['prospect_level'] == "Undergraduate"){
-   // asu_rfi_undergrad_post($form_state['values']);
+    //asu_rfi_undergrad_post($form_state['values']);
    }
    
     unset($_SESSION['rfi_data']);
@@ -1456,7 +1458,7 @@ function asu_rfi_current_form_data_submit($form, &$form_state){
    $uniqueid = $email.$program ;
   
    //Query database to get program name based on the program code submitted in the form
-   $program_name = db_query('select field_asu_degree_major_value from field_data_field_asu_degree_major mj join field_data_field_asu_degree_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_degree_plan_value = :plan', array(':plan' => $program))->fetchField();
+   $program_name = db_query('select field_asu_degree_awarded_value from field_data_field_asu_degree_awarded mj join field_asu_academic_plan ap on mj.entity_id = ap.entity_id where ap.field_asu_academic_plan_value = :plan', array(':plan' => $program))->fetchField();
  
   //Create node
    $ent_values = array(
@@ -1627,8 +1629,8 @@ function _asu_rfi_program(){
     $program = array();
     $node = menu_get_object();
     $dcode = $node->title;
-    $dname = $node->field_asu_degree_major['und'][0]['value'];
-    $college_code = $node->field_asu_degree_prog['und'][0]['value'];
+    $dname = $node->field_asu_degree_awarded['und'][0]['value'];
+    $college_code = $node->field_asu_academic_plan['und'][0]['value'];
     $program[$dcode] = $dname;
    
     return $program;

@@ -514,12 +514,14 @@ function asu_rfi_cron() {
   
   //check if the site hasn't posted submissions to salesforce for two days. If yes, send an email to administrator.
    //Get last time site had successfull submission
-   $last_sf_success = variable_get('last_success_SF_posting', NULL); variable_set('last_success_SF_posting', time());
-   $last_sf_failure = variable_get('last_failure_SF_posting', NULL); 
+   $last_sf_success = variable_get('last_success_SF_posting', 0); 
+   $last_sf_failure = variable_get('last_failure_SF_posting', 0); 
    $timediff = $last_sf_failure - $last_sf_success ;
-   
-   if($timediff > 17280){ //greater that two days
-         $to_email = variable_get('asu_rfi_error_email', NULL);
+   $last_sf_attempt = variable_get('last_attempt_SF_posting', 0);
+   $timediff_attempt =  $last_sf_attempt - $last_sf_success ;
+   $to_email = variable_get('asu_rfi_error_email', NULL);
+   if(($timediff > 17280) || ($timediff_attempt > 17280)){ //greater that two days
+        if(!empty($to_email)){
          //send email to admin reporting the issue
          $content = "The site ".$_SERVER['HTTP_HOST']." hasn\'t been submitting to Salesforce since 2 days";
          $subject = "Failed submissions to Sales Force from ".$_SERVER['HTTP_HOST'];
@@ -549,8 +551,8 @@ function asu_rfi_cron() {
           watchdog('asu_rfi', 'SF Error message email sent to '.$to_email);
           variable_set('SF_error_message_sent', time());
         }
+        }
    }
-
 }
 
 /**
@@ -606,8 +608,9 @@ function asu_rfi_repost_rfi($data) {
         $gradpost['prog_plan'] = $node->field_rfi_program['und'][0]['value'];
         $gradpost['comment'] = $node->field_rfi_question['und'][0]['value'];
         $gradpost['submission_nodeid'] = $node->nid;
-        // asu_rfi_grad_post($gradpost);
-        // watchdog('SF grad posting', "Posted successfully to ".$data->nid." from cron page");
+         asu_rfi_grad_post($gradpost);
+       watchdog('SF grad posting', "Posted successfully to ".$data->nid);
+       variable_set('last_attempt_SF_posting', time());
         
        }
      }
@@ -766,8 +769,14 @@ function asu_rfi_get_undergrad_programs() {
           if($degreetype == "undergrad"){
              variable_set('asu_rfi_ugrad_degree_type', $degreetype);
           }
+          else{
+              variable_set('asu_rfi_ugrad_degree_type', NULL);
+          }
           if($degreetype == "graduate"){
             variable_set('asu_rfi_graduate_degree_type', $degreetype);
+          }
+          else{
+            variable_set('asu_rfi_graduate_degree_type', NULL);
           }
       }
   
@@ -775,14 +784,13 @@ function asu_rfi_get_undergrad_programs() {
  $query = new EntityFieldQuery();
  
  $query->entityCondition('entity_type', 'node')
-    ->entityCondition('bundle', 'asu_eadvisor_degree')
+    ->entityCondition('bundle', 'asu_degree')
     ->propertyCondition('status', 1)
-    ->fieldCondition('field_asu_degree_major', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_diploma_descr', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_prog', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_plan', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_degree_awarded', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_academic_program', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_academic_plan', 'value' ,'NULL', '!=')
     ->fieldCondition('field_asu_degree_program', 'value' ,'undergrad', '=')
-    ->fieldOrderBy('field_asu_degree_major', 'value', 'ASC')
+    ->fieldOrderBy('field_asu_degree_awarded', 'value', 'ASC')
     
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
     $result = $query->execute();
@@ -796,10 +804,9 @@ function asu_rfi_get_undergrad_programs() {
 
     $program_wrapper = entity_metadata_wrapper('node', $program);
 
-    $program_abbr = $program_wrapper->field_asu_degree_major->value();
-    $college_name = $program_wrapper->field_asu_degree_diploma_descr->value();
-    $college_code = $program_wrapper->field_asu_degree_prog->value();
-    $program_plan_code = $program_wrapper->field_asu_degree_plan->value();
+    $program_abbr = $program_wrapper->field_asu_degree_awarded->value();
+    $college_code = $program_wrapper->field_asu_academic_program->value();
+    $program_plan_code = $program_wrapper->field_asu_academic_plan->value();
 
     // Abbr in value matches how we present name in get programs Views
     // Datasource View.
@@ -816,14 +823,13 @@ function asu_rfi_get_grad_programs() {
  $query = new EntityFieldQuery();
  
  $query->entityCondition('entity_type', 'node')
-    ->entityCondition('bundle', 'asu_eadvisor_degree')
+    ->entityCondition('bundle', 'asu_degree')
     ->propertyCondition('status', 1)
-    ->fieldCondition('field_asu_degree_major', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_diploma_descr', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_prog', 'value' ,'NULL', '!=')
-    ->fieldCondition('field_asu_degree_plan', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_degree_awarded', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_academic_program', 'value' ,'NULL', '!=')
+    ->fieldCondition('field_asu_academic_plan', 'value' ,'NULL', '!=')
     ->fieldCondition('field_asu_degree_program', 'value' ,'graduate', '=')
-    ->fieldOrderBy('field_asu_degree_major', 'value', 'ASC')
+    ->fieldOrderBy('field_asu_degree_awarded', 'value', 'ASC')
     
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
     $result = $query->execute();
@@ -838,10 +844,9 @@ function asu_rfi_get_grad_programs() {
 
     $program_wrapper = entity_metadata_wrapper('node', $program);
 
-    $program_abbr = $program_wrapper->field_asu_degree_major->value();
-    $college_name = $program_wrapper->field_asu_degree_diploma_descr->value();
-    $college_code = $program_wrapper->field_asu_degree_prog->value();
-    $program_plan_code = $program_wrapper->field_asu_degree_plan->value();
+    $program_abbr = $program_wrapper->field_asu_degree_awarded->value();
+    $college_code = $program_wrapper->field_asu_academic_program->value();
+    $program_plan_code = $program_wrapper->field_asu_academic_plan->value();
 
     // Abbr in value matches how we present name in get programs Views
     // Datasource View.
