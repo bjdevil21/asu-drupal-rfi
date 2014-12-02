@@ -78,7 +78,11 @@ function asu_rfi_install(){
 
 function asu_rfi_uninstall(){
   drupal_uninstall_schema('asu_rfi');
- 
+  variable_del('asu_rfi_form_mode');
+  variable_del('asu_rfi_google_analytics_key');
+  variable_del('asu_rfi_error_email');
+  variable_del('asu_rfi_error_email');
+  variable_del('asu_rfi_from_email_field');
  }
 
 ?>

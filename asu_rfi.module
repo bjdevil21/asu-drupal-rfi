@@ -218,7 +218,7 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
       //check if the site has grad and undergrad degrees and show form type options accordingly
  if((sizeof($ugrad_degree_type) > 0) && (sizeof($graduate_degree_type) > 0 )){
         $form_types = array(
-                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU eAdvisor Degree" in block Visibility settings)',
+                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU Degree" in block Visibility settings)',
                           'ugrad_longform' => 'Undergraduate Long form',
                           'graduate_longform' => 'Graduate Long form',
                           'current_undergrad_form' => 'Current undergrad form',
@@ -227,14 +227,14 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
       }
   elseif((sizeof($ugrad_degree_type) > 0 ) && (sizeof($graduate_degree_type) == 0)){
        $form_types = array(
-                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU eAdvisor Degree" in block Visibility settings)',
+                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU Degree" in block Visibility settings)',
                           'ugrad_longform' => 'Undergraduate Long form',
                           'current_undergrad_form' => 'Current undergrad form'
                           );
   }
    elseif((sizeof($ugrad_degree_type) == 0) && (sizeof($graduate_degree_type) > 0)){
       $form_types = array(
-                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU eAdvisor Degree" in block Visibility settings)',
+                          'multiform' => 'Multi step form (This multi step form will be shown only on degree pages. Select content type and choose "ASU Degree" in block Visibility settings)',
                           'graduate_longform' => 'Graduate Long form',
                           'current_grad_form' => 'Current Grad form'
                           );
@@ -328,7 +328,9 @@ function asu_rfi_block_save($delta = '', $edit = array()) {
       //Below line added by Archana
       variable_set('asu_rfi_form_block_type'. $multi_id, $edit['asu_rfi_form_block_type']);
       variable_set('asu_rfi_form_block_programs' . $multi_id, $edit['asu_rfi_form_block_programs']);
-      variable_set('asu_rfi_form_block_grad_programs' . $multi_id, $edit['asu_rfi_form_block_grad_programs']);
+      if(!empty($edit['asu_rfi_form_block_grad_programs'])){
+        variable_set('asu_rfi_form_block_grad_programs' . $multi_id, $edit['asu_rfi_form_block_grad_programs']);
+      }
     break;
   }
 }
@@ -519,8 +521,10 @@ function asu_rfi_cron() {
    $timediff = $last_sf_failure - $last_sf_success ;
    $last_sf_attempt = variable_get('last_attempt_SF_posting', 0);
    $timediff_attempt =  $last_sf_attempt - $last_sf_success ;
-   $to_email = variable_get('asu_rfi_error_email', NULL);
-   if(($timediff > 17280) || ($timediff_attempt > 17280)){ //greater that two days
+   $last_email_sent = variable_get('SF_error_message_sent', 0);
+   $to_email = variable_get('asu_rfi_error_email', NULL); //get error reporting email address from rfi admin settings page
+   if (($last_email_sent - time()) > 86400) { // If the email was sent within 2hrs, don't send it again.
+    if(($timediff > 17280) || ($timediff_attempt > 17280)){ //greater that two days
         if(!empty($to_email)){
          //send email to admin reporting the issue
          $content = "The site ".$_SERVER['HTTP_HOST']." hasn\'t been submitting to Salesforce since 2 days";
@@ -551,7 +555,8 @@ function asu_rfi_cron() {
           watchdog('asu_rfi', 'SF Error message email sent to '.$to_email);
           variable_set('SF_error_message_sent', time());
         }
-        }
+      }
+    }
    }
 }
 
@@ -608,9 +613,9 @@ function asu_rfi_repost_rfi($data) {
         $gradpost['prog_plan'] = $node->field_rfi_program['und'][0]['value'];
         $gradpost['comment'] = $node->field_rfi_question['und'][0]['value'];
         $gradpost['submission_nodeid'] = $node->nid;
-         asu_rfi_grad_post($gradpost);
-       watchdog('SF grad posting', "Posted successfully to ".$data->nid);
-       variable_set('last_attempt_SF_posting', time());
+        asu_rfi_grad_post($gradpost);
+       // watchdog('SF grad posting', "Posted successfully to ".$data->nid);
+        variable_set('last_attempt_SF_posting', time());
         
        }
      }

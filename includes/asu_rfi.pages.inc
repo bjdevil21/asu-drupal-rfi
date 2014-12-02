@@ -11,12 +11,7 @@ module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_email');
 module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_grad_post');
 //module_load_include('inc', 'asu_rfi', 'includes/asu_rfi_undergrad_post');
 
- 
-function asu_rfi_init() {
 
-//  drupal_add_css(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.css','file');
- 
-}
 
 /* Implementation of hook_form **/
 
@@ -52,9 +47,18 @@ function asu_rfi_form_data($form, &$form_state) {
     $dname = $node->field_asu_degree_awarded['und'][0]['value'];
     $degree[$dcode] = $dname;
     $type_degree = $node->field_asu_degree_program['und'][0]['value'];
-    $college_code = $node->field_asu_academic_program['und'][0]['value'];
-    $college_name = $node->field_asu_diploma_description['und'][0]['value'];
-   
+    if(!empty($node->field_asu_academic_program)){
+	$college_code = $node->field_asu_academic_program['und'][0]['value'];
+    }
+    else{
+	$college_code = "None";
+    }
+    if(!empty($node->field_asu_diploma_description)){
+	$college_name = $node->field_asu_diploma_description['und'][0]['value'];
+    }
+    else{
+	$college_name = '';
+    }
     }
    
    
@@ -222,7 +226,7 @@ function asu_rfi_form_data($form, &$form_state) {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-body">
-        Your birthday is important! Not only will we send you a birthday message, it helps us keep your information helps us keep your information secure as a unique identifier for your online submission.
+        Your birthday is important! Not only will we send you a birthday message, it helps us keep your information secure as a unique identifier for your online submission.
       </div>
       <div class="modal-footer">
          <div class="btn btn-default" data-dismiss="modal">Close</div>
@@ -295,14 +299,14 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   
   
   //validate first name
-   if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$fname)){
+   if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
         form_set_error('first_name', t('First name field accepts only plain text'));
 	$fname = ucfirst($fname);
    }
   //validate last name
-   if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
-	$lanme = ucfirst(lname);
+   if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
+        form_set_error('first_name', t('Last name field accepts only plain text'));
+	$lname = ucfirst($lname);
    }
   //validation for email
     if( !preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $email)){
@@ -492,9 +496,14 @@ function asu_rfi_form_data_submit($form, &$form_state){
   //Load asu_rfi_email.inc file to send email
   // form_load_include($form_state, 'inc', 'asu_rfi', 'includes/asu_rfi_email');
    asu_rfi_email($form_state['storage']['prog_plan'], $form_state['storage']['email']);
-  }
+  
   $form_state['storage']['submission_nodeid'] = $entity->nid;
   $form_state['storage']['step'] = 'asu_rfi_second_form';
+  }
+  else{
+     drupal_set_message('You are submitting duplicate data', 'warning');
+    $form_state['storage']['step'] = '';
+  }
 }
 
 /** construct the second form **/
@@ -625,6 +634,14 @@ function asu_rfi_second_form_validate($form,&$form_state){
    if($state_check == ''){
        form_set_error('state', t('Please enter valid state from the suggestions provided'));
    }
+  }
+  
+   //validate comments
+   if(strlen($form_state['values']['questions']) > 255){
+      form_set_error('questions', t('Comments field exceeded 255 characters limit'));
+   }
+   if(!preg_match("/^[a-zA-Z\._-\s]+$/",$form_state['values']['questions'])){
+    form_set_error('questions', t('Questions field accepts only plain text'));
   }
  
 }
@@ -884,7 +901,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-body">
-        Your birthday is important! Not only will we send you a birthday message, it helps us keep your information helps us keep your information secure as a unique identifier for your online submission.
+        Your birthday is important! Not only will we send you a birthday message, it helps us keep your information secure as a unique identifier for your online submission.
       </div>
       <div class="modal-footer">
         <div class="btn btn-default" data-dismiss="modal">Close</div>
@@ -1019,13 +1036,13 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    $form_type = $form_state['values']['degree_type'];
    
   //validate first name
-   if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$fname)){
+   if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
         form_set_error('first_name', t('First name field accepts only plain text'));
 	
    }
   //validate last name
-   if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+   if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
+        form_set_error('first_name', t('Last name field accepts only plain text'));
 	
    }
   //validation for email
@@ -1095,6 +1112,9 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
     }
+ if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
+    form_set_error('questions', t('Questions field accepts only plain text'));
+  }
 }
 
 /* submit handler */
@@ -1415,7 +1435,7 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field accepts only plain text'));
 	
    }
   //validation for email
@@ -1432,6 +1452,9 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    if ($len > 255) 
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
+    }
+    if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
+      form_set_error('questions', t('Questions field accepts only plain text'));
     }
 }
 
@@ -1484,8 +1507,9 @@ function asu_rfi_current_form_data_submit($form, &$form_state){
   $ewrapper->field_rfi_question->set($questions);
   $ewrapper->field_rfi_submission_status->set('Complete');
   $ewrapper->save();
-  
-  drupal_goto('degree-programs/request-info-thank-you');
+  $coded_nid = base64_encode($entity->nid);
+   drupal_goto("/degree-programs/request-info-thank-you/$coded_nid");
+ 
 }
 
 

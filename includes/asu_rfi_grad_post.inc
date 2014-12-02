@@ -2,7 +2,7 @@
 
 function asu_rfi_grad_post($data){
   global $base_url;
-  dpm($data);
+
   $fname = $data['first_name'];
   $lname = $data['last_name'];
   $email = $data['email'];
@@ -120,8 +120,6 @@ foreach($submission_data as $key_value => $result_array){
 	
 	curl_close($curl);
 	
-	dpm($info);
-	
 //Get the previous page node
 $destination = drupal_get_destination();
 
@@ -181,6 +179,13 @@ if(($info['http_code'] == 200)){
   //Clear cache on field to display field's updated value on front end        
   $cid = 'field:node:' . $nodeid;
   cache_clear_all($cid, 'cache_field');
+   //if succesfully to post to SF, the set "last_failure_SF_posting" variable to current time
+  variable_set('last_success_SF_posting', time());
+}
+
+//if failed to post to SF, the set "last_failure_SF_posting" variable to current time
+if(($response->code != 200)){
+  variable_set('last_failure_SF_posting', time());
 }
 
 
