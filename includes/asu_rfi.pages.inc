@@ -42,7 +42,7 @@ function asu_rfi_form_data($form, &$form_state) {
   //Load the current node object to get program name and degree type
     $degree = array();
     $node = menu_get_object();
-    if(isset($node)){
+    if(!empty($node)){
     $dcode = $node->title;
     $dname = $node->field_asu_degree_awarded['und'][0]['value'];
     $degree[$dcode] = $dname;
@@ -300,12 +300,12 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field must contain only text characters (no numbers or symbols).'));
 	$fname = ucfirst($fname);
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field must contain only text characters (no numbers or symbols).'));
 	$lname = ucfirst($lname);
    }
   //validation for email
@@ -346,14 +346,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
    }
   }
   
-  //validation for questions
-  if(isset($form_storage['questions'])){
-   $len =  strlen($form_storage['questions']); // validation for comments character limit to 255
-   if ($len > 255) 
-      {
-	  form_set_error('questions', t('Questions field can take upto 255 characters long'));
-      }
-   } 
+  
 }
 
 
@@ -385,7 +378,7 @@ function asu_rfi_form_data_submit($form, &$form_state){
   $sms_opted = $form_state['values']['mobile_check'];
  
    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
-   if(isset($sms_opted)){
+   if(!empty($sms_opted)){
      if(substr($form_state['values']['phone'], 0,1) != "1"){
        $form_state['storage']['sms'] = '1'.$form_state['values']['phone'];
      }
@@ -611,7 +604,7 @@ function asu_rfi_second_form_validate($form,&$form_state){
    $state = check_plain($form_state['values']['state']);
    $city = check_plain($form_state['values']['city']);
    $state = check_plain($form_state['values']['state']);
-   
+   $zip = check_plain($form_state['values']['zipcode']);
   //validate address
   if(!empty($address)){
     if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$address)){
@@ -624,8 +617,20 @@ function asu_rfi_second_form_validate($form,&$form_state){
         form_set_error('city', t('City field accepts only plain text'));
    }
   }
-
-    
+  
+   //validate zip code
+  if(!empty($zip)){
+   if( !preg_match("/^[0-9\._-\s]+$/",$zip)){
+        form_set_error('Zipcode', t('Zipcode accepts only numbers'));
+    }
+    if((strlen($zip) < 5)){
+	form_set_error('Zipcode', t('Zipcode cannot be less than 5 digits'));
+     }
+     if(strlen($zip) > 10){
+	form_set_error('Zipcode', t('Zipcode cannot be longer than 10 digits'));
+     }
+  }
+  
   //validate state
   if(!empty($state)){
    $state_check =  $result = db_query("SELECT * FROM {asu_rfi_states_list} ars WHERE ars.stateDesc = :state_desc", array(':state_desc' => $state))->fetchField();
@@ -637,13 +642,14 @@ function asu_rfi_second_form_validate($form,&$form_state){
   }
   
    //validate comments
-   if(strlen($form_state['values']['questions']) > 255){
+   if(!empty($form_state['values']['questions'])){
+     if(strlen($form_state['values']['questions']) > 255){
       form_set_error('questions', t('Comments field exceeded 255 characters limit'));
-   }
-   if(!preg_match("/^[a-zA-Z\._-\s]+$/",$form_state['values']['questions'])){
-    form_set_error('questions', t('Questions field accepts only plain text'));
+    }
+    if(!preg_match("/^[a-zA-Z\._-\s]+$/",$form_state['values']['questions'])){
+     form_set_error('questions', t('Questions field accepts only plain text'));
+    }
   }
- 
 }
 
 
@@ -688,7 +694,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
     $international = "TRUE";
     $form_state['storage']['citizenship'] = "TRUE";
    }
-   if(isset($veteran)){
+   if(!empty($veteran)){
     $military = $form_state['values']['military'];
    }
    else{
@@ -854,7 +860,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     
    $form['about_me']['phone'] = array(
 	'#type' => 'textfield',
-	'#title' => t('Preffered phone number'),
+	'#title' => t('Preferred phone number'),
 	'#description' => t('USA Format: xxx-xxx-xxxx<br />International format: (Area code) xxx-xxx-xxxx'),
 	'#size' => 30,
 	'#maxlength' => 30,
@@ -1037,12 +1043,12 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field must contain only text characters (no numbers or symbols).'));
 	
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field must contain only text characters (no numbers or symbols).'));
 	
    }
   //validation for email
@@ -1062,7 +1068,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    }
   }
   //validate zip code
-  if(isset($zip)){
+  if(!empty($zip)){
     if( !preg_match("/^[0-9\._-\s]+$/",$zip)){
         form_set_error('Zipcode', t('Zipcode accepts only numbers'));
     }
@@ -1107,13 +1113,15 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   }
   
   //validation for questions
-  $len =  strlen($questions); // validation for comments character limit to 255
+  if(!empty($questions)){
+   $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
     }
- if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
+   if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
     form_set_error('questions', t('Questions field accepts only plain text'));
+   }
   }
 }
 
@@ -1148,7 +1156,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
    $sms_opted = $form_state['values']['mobile_check'];
  
    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
-   if(isset($sms_opted)){
+   if(!empty($sms_opted)){
      if(substr($form_state['values']['phone'], 0,1) != "1"){
        $form_state['values']['mobile_check'] = '1'.$form_state['values']['phone'];
      }
@@ -1165,7 +1173,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
    $state = check_plain($form_state['values']['state']);
    $city = check_plain($form_state['values']['city']);
    $state = check_plain($form_state['values']['state']);
-   if(isset($form_state['values']['country'])){
+   if(!empty($form_state['values']['country'])){
      $country = check_plain($form_state['values']['country']);
    }
    else{
@@ -1182,7 +1190,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
   }
   
   //Questions
-  if(isset($form_state['values']['questions'])){
+  if(!empty($form_state['values']['questions'])){
     $questions = $form_state['values']['questions'];
   }
   else{
@@ -1190,7 +1198,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
   }
    
    //Citizenship
-   if(isset($form_state['values']['citizenship'])){
+   if(!empty($form_state['values']['citizenship'])){
      $international = "FALSE";
      $form_state['values']['citizenship'] = "FALSE";
    }
@@ -1367,7 +1375,7 @@ function asu_rfi_current_form_data($form, &$form_state, $programs, $form_type){
     
    $form['about_me']['phone'] = array(
 	'#type' => 'textfield',
-	'#title' => t('Preffered phone number'),
+	'#title' => t('Preferred phone number'),
 	'#description' => t('USA Format: xxx-xxx-xxxx<br />International format: (Area code) xxx-xxx-xxxx'),
 	'#size' => 30,
 	'#maxlength' => 30,
@@ -1430,12 +1438,12 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    
   //validate first name
    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field must contain only text characters (no numbers or symbols).'));
 	
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field must contain only text characters (no numbers or symbols).'));
 	
    }
   //validation for email
@@ -1448,7 +1456,8 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    }
   
   //validation for questions
-  $len =  strlen($questions); // validation for comments character limit to 255
+  if(!empty($questions)){
+   $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
@@ -1456,6 +1465,7 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
     if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
       form_set_error('questions', t('Questions field accepts only plain text'));
     }
+  }
 }
 
 /* submit handler of current students form*/
@@ -1470,7 +1480,7 @@ function asu_rfi_current_form_data_submit($form, &$form_state){
    $ipaddress = $form_state['values']['ip_address'];
   
   //Questions
-  if(isset($form_state['values']['questions'])){
+  if(!empty($form_state['values']['questions'])){
     $questions = $form_state['values']['questions'];
   }
   else{
@@ -1548,7 +1558,7 @@ function asu_rfi_countries($string = '') {
     ->execute();
  
   // add matches to $matches
-  if(isset($return)){
+  if(!empty($return)){
  foreach ($return as $row) {
     $matches[$row->countryDesc] = check_plain($row->countryDesc);
   }
@@ -1635,7 +1645,7 @@ function _asu_rfi_sem_dates(){
       }
    
     }
- if(isset($termdate)){
+ if(!empty($termdate)){
    $sem_dates_array = array_intersect($termdate, $options);
 
  }
