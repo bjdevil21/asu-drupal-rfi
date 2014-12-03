@@ -860,7 +860,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     
    $form['about_me']['phone'] = array(
 	'#type' => 'textfield',
-	'#title' => t('Preffered phone number'),
+	'#title' => t('Preferred phone number'),
 	'#description' => t('USA Format: xxx-xxx-xxxx<br />International format: (Area code) xxx-xxx-xxxx'),
 	'#size' => 30,
 	'#maxlength' => 30,
@@ -1375,7 +1375,7 @@ function asu_rfi_current_form_data($form, &$form_state, $programs, $form_type){
     
    $form['about_me']['phone'] = array(
 	'#type' => 'textfield',
-	'#title' => t('Preffered phone number'),
+	'#title' => t('Preferred phone number'),
 	'#description' => t('USA Format: xxx-xxx-xxxx<br />International format: (Area code) xxx-xxx-xxxx'),
 	'#size' => 30,
 	'#maxlength' => 30,
