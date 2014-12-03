@@ -346,14 +346,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
    }
   }
   
-  //validation for questions
-  if(isset($form_storage['questions'])){
-   $len =  strlen($form_storage['questions']); // validation for comments character limit to 255
-   if ($len > 255) 
-      {
-	  form_set_error('questions', t('Questions field can take upto 255 characters long'));
-      }
-   } 
+  
 }
 
 
@@ -637,13 +630,14 @@ function asu_rfi_second_form_validate($form,&$form_state){
   }
   
    //validate comments
-   if(strlen($form_state['values']['questions']) > 255){
+   if(isset($form_state['values']['questions'])){
+     if(strlen($form_state['values']['questions']) > 255){
       form_set_error('questions', t('Comments field exceeded 255 characters limit'));
-   }
-   if(!preg_match("/^[a-zA-Z\._-\s]+$/",$form_state['values']['questions'])){
-    form_set_error('questions', t('Questions field accepts only plain text'));
+    }
+    if(!preg_match("/^[a-zA-Z\._-\s]+$/",$form_state['values']['questions'])){
+     form_set_error('questions', t('Questions field accepts only plain text'));
+    }
   }
- 
 }
 
 
@@ -1107,13 +1101,15 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   }
   
   //validation for questions
-  $len =  strlen($questions); // validation for comments character limit to 255
+  if(isset($questions)){
+   $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
     }
- if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
+   if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
     form_set_error('questions', t('Questions field accepts only plain text'));
+   }
   }
 }
 
@@ -1448,7 +1444,8 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    }
   
   //validation for questions
-  $len =  strlen($questions); // validation for comments character limit to 255
+  if(isset($questions)){
+   $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
 	form_set_error('questions', t('Questions field can take upto 255 characters long'));
@@ -1456,6 +1453,7 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
     if(!preg_match("/^[a-zA-Z\._-\s]+$/",$questions)){
       form_set_error('questions', t('Questions field accepts only plain text'));
     }
+  }
 }
 
 /* submit handler of current students form*/
