@@ -604,7 +604,7 @@ function asu_rfi_second_form_validate($form,&$form_state){
    $state = check_plain($form_state['values']['state']);
    $city = check_plain($form_state['values']['city']);
    $state = check_plain($form_state['values']['state']);
-   
+   $zip = check_plain($form_state['values']['zipcode']);
   //validate address
   if(!empty($address)){
     if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$address)){
@@ -617,8 +617,20 @@ function asu_rfi_second_form_validate($form,&$form_state){
         form_set_error('city', t('City field accepts only plain text'));
    }
   }
-
-    
+  
+   //validate zip code
+  if(!empty($zip)){
+   if( !preg_match("/^[0-9\._-\s]+$/",$zip)){
+        form_set_error('Zipcode', t('Zipcode accepts only numbers'));
+    }
+    if((strlen($zip) < 5)){
+	form_set_error('Zipcode', t('Zipcode cannot be less than 5 digits'));
+     }
+     if(strlen($zip) > 10){
+	form_set_error('Zipcode', t('Zipcode cannot be longer than 10 digits'));
+     }
+  }
+  
   //validate state
   if(!empty($state)){
    $state_check =  $result = db_query("SELECT * FROM {asu_rfi_states_list} ars WHERE ars.stateDesc = :state_desc", array(':state_desc' => $state))->fetchField();
