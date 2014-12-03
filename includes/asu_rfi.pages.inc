@@ -300,12 +300,12 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field accepts only plain text and alphabets'));
 	$fname = ucfirst($fname);
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field accepts only plain text and alphabets'));
 	$lname = ucfirst($lname);
    }
   //validation for email
@@ -1043,12 +1043,12 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field accepts only plain text and alphabets'));
 	
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field accepts only plain text and alphabets'));
 	
    }
   //validation for email
@@ -1438,12 +1438,12 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    
   //validate first name
    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$fname)){
-        form_set_error('first_name', t('First name field accepts only plain text'));
+        form_set_error('first_name', t('First name field accepts only plain text and alphabets'));
 	
    }
   //validate last name
    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$lname)){
-        form_set_error('first_name', t('Last name field accepts only plain text'));
+        form_set_error('first_name', t('Last name field accepts only plain text and alphabets'));
 	
    }
   //validation for email
