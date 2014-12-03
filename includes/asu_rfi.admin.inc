@@ -38,7 +38,19 @@ function asu_rfi_admin_settings($form_state){
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
     '#description' => t("Specifiy the form authentication key from middle wear."),
     '#required' => TRUE,
-    ); */
+    );
+    */ 
+     //Error notification email if submissions to Sales force failed for more than 2 days
+    $form['asu_rfi_error_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email(s) for error notification'),
+    '#default_value' => variable_get('asu_rfi_error_email', NULL),
+    '#attributes' => array('class' => array('asu_rfi_admin_field')),
+    '#description' => t("Email ID(s) of the personnal to be notified if site cannot post RFI submissions to salesforce for more than 2 days."),
+    '#size' => 60, 
+    '#maxlength' => 150,
+    );
+   
     
     $form['asu_rfi_form_access']['asu_rfi_google_analytics_key'] = array(
     '#type' => 'textfield',

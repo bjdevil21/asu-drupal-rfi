@@ -2,7 +2,7 @@
 
 function asu_rfi_grad_post($data){
   global $base_url;
-  dpm($data);
+
   $fname = $data['first_name'];
   $lname = $data['last_name'];
   $email = $data['email'];
@@ -105,59 +105,71 @@ foreach($submission_data as $key_value => $result_array){
     }
 }
 
-// build the URL encoded
-$at = http_build_query($submission_data, '', '&');  
-   
-// post the data
-$options = array(
-                'method' => 'POST',
-                'data' => $at,
-                'timeout' => 90,
-                'headers' => $headers,
-                 );
-    
-$response = drupal_http_request($url, $options); // send the response
-dpm($response, "response from Salesforce");
 
+      //url to post data to salesforce
+        $curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); //If you don't want to use any of the return information, set to false
+	curl_setopt($curl, CURLOPT_HEADER, TRUE); //Set this to false to remove informational headers
+	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $submission_data); //data mapping
+	curl_setopt($curl, CURLOPT_SSLVERSION, 1); //This will set the security protocol to TLSv1
+	
+	$response = curl_exec($curl);
+	
+	$info = curl_getinfo($curl); //Used by your drupal messages below
+	
+	curl_close($curl);
+	
 //Get the previous page node
 $destination = drupal_get_destination();
 
 //$data_options = $_SESSION['rfi_data'];
 
 //append previous page node and append it to base url
-$goto_url = $base_url .'/'.$destination['destination'];
+//$goto_url = $base_url .'/'.$destination['destination'];
 
 
-if($response->code == 400) {
-		//$options = array('query' => array('fname' => $fname, 'lname' => $lname, 'email' => $email, 'phone' => $phone, 'term' => $term, 'current_prev_student' => $current_prev_student));
+if($info['http_code'] == 400) {
+
 		drupal_set_message( "Please fix the following issue and try submitting the form again:<br />" . $response->data, 'error');
-              //  drupal_goto($goto_url, $data_options );
+               // drupal_goto($goto_url, $data_options );
                 $status = "Incomplete";
 }
-if($response->code == 500) {
+if($info['http_code'] == 500) {
 		drupal_set_message($response->data . "<br />We have an issue with our form, and we’re working on fixing it. We apologize for the inconvenience. In the meantime, please send an email to <a href='mailto:gograd@asu.edu'>gograd@asu.edu</a> about your interest in graduate studies, and we will be glad to get you the information you need to take your next steps. Thank you.", 'error');
 		 $status = "Pending";
-               //  unset($_SESSION['rfi_data']);
+                // unset($_SESSION['rfi_data']);
 }
 
 
 
 //Get the response from Salesforce. If the submission is not successfull, update the previous submission status to Incomplete
-if(($response->code == 400) || ($response->code == 500)){
+if(($info['http_code'] == 400) || ($info['http_code'] == 500)){
     		
   $node_status_updated = db_update('field_data_field_rfi_submission_status') 
   ->fields(array(
     'field_rfi_submission_status_value' => $status,
+    'field_rfi_error_message_value' => $response->data,
   ))
   ->condition('entity_id', $nodeid)
   ->execute();
+  
+  //update error message
+   $node_error_updated = db_update('field_data_field_rfi_error_message') 
+  ->fields(array(
+    'field_rfi_error_message_value' => $response->data,
+  ))
+  ->condition('entity_id', $nodeid)
+  ->execute();
+  
+  
   //Clear cache on field to display field's updated value on front end        
   $cid = 'field:node:' . $nodeid;
   cache_clear_all($cid, 'cache_field');
 }
 
-if(($response->code == 200) || ($response->code == -110)){
-    //unset($_SESSION['rfi_data']);
+if(($info['http_code'] == 200)){
+   // unset($_SESSION['rfi_data']);
     $node_status_updated = db_update('field_data_field_rfi_submission_status') 
   ->fields(array(
     'field_rfi_submission_status_value' => 'SF_Complete',
@@ -167,6 +179,13 @@ if(($response->code == 200) || ($response->code == -110)){
   //Clear cache on field to display field's updated value on front end        
   $cid = 'field:node:' . $nodeid;
   cache_clear_all($cid, 'cache_field');
+   //if succesfully to post to SF, the set "last_failure_SF_posting" variable to current time
+  variable_set('last_success_SF_posting', time());
+}
+
+//if failed to post to SF, the set "last_failure_SF_posting" variable to current time
+if(($response->code != 200)){
+  variable_set('last_failure_SF_posting', time());
 }
 
 

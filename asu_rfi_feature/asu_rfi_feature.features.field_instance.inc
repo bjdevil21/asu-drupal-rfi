@@ -245,67 +245,6 @@ function asu_rfi_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-asu_rfi-field_rfi_dateofbirth'
-  $field_instances['node-asu_rfi-field_rfi_dateofbirth'] = array(
-    'bundle' => 'asu_rfi',
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'date',
-        'settings' => array(
-          'format_type' => 'long',
-          'fromto' => 'both',
-          'multiple_from' => '',
-          'multiple_number' => '',
-          'multiple_to' => '',
-          'show_repeat_rule' => 'show',
-        ),
-        'type' => 'date_default',
-        'weight' => 26,
-      ),
-      'featured' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_rfi_dateofbirth',
-    'label' => 'Date of birth',
-    'required' => 0,
-    'settings' => array(
-      'default_value' => 'now',
-      'default_value2' => 'same',
-      'default_value_code' => '',
-      'default_value_code2' => '',
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'date',
-      'settings' => array(
-        'increment' => 15,
-        'input_format' => 'Y-m-d H:i:s',
-        'input_format_custom' => '',
-        'label_position' => 'above',
-        'repeat_collapsed' => 0,
-        'text_parts' => array(),
-        'year_range' => '-3:+3',
-      ),
-      'type' => 'date_text',
-      'weight' => 22,
-    ),
-  );
-
   // Exported field_instance: 'node-asu_rfi-field_rfi_dob'
   $field_instances['node-asu_rfi-field_rfi_dob'] = array(
     'bundle' => 'asu_rfi',
@@ -1433,7 +1372,6 @@ function asu_rfi_feature_field_default_field_instances() {
   t('College name');
   t('Country');
   t('DOB');
-  t('Date of birth');
   t('Email');
   t('Error message from MW');
   t('First name');
