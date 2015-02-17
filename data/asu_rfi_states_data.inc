@@ -19,7 +19,8 @@
   $options = array(
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_HTTPHEADER => array('Content-Type: text/json', 'Authorization: Basic ' . base64_encode('apuliroj:3UIzHi6vMNXDTV9p')),
+    CURLOPT_HTTPHEADER => array('Content-Type: text/json', 'Authorization: Basic 2415:ad704ff7a5c88441f6c4e160dbda2b4e10d7727f'),
+
   );  
 
   curl_setopt_array($ch, $options);
