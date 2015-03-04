@@ -93,13 +93,26 @@ function asu_rfi_admin_settings($form_state){
    
    $form['asu_rfi_confirm_content']['asu_rfi_undergrad_confirm_node'] = array(
     '#type' => 'textfield',
-    '#title' => t('Enter undergrad confirmation node id'),
+    '#title' => t('Enter undergraduate confirmation node id'),
     '#default_value' => variable_get('asu_rfi_undergrad_confirm_node'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
-    '#description' => t("Enter the node id of the undergraduate node whose body content has to be included on the confirmation page."),
+    '#description' => t("Enter a custom node id for the undergraduate form confirmation page. If left empty, default confirmation template will be used."),
     '#states' => array(
       'visible' => array(
         ':input[name="undergrad_degree_type"]' => array('value' => 'undergrad'),
+	),
+      ),
+    );
+   
+   $form['asu_rfi_confirm_content']['asu_rfi_grad_confirm_node'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter graduate confirmation node id'),
+    '#default_value' => variable_get('asu_rfi_grad_confirm_node'),
+    '#attributes' => array('class' => array('asu_rfi_admin_field')),
+    '#description' => t("Enter a custom node id for the graduate form confirmation page. If left empty, default confirmation template will be used."),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="grad_degree_type"]' => array('value' => 'graduate'),
 	),
       ),
     );

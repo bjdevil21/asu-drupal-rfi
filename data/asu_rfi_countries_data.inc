@@ -1,41 +1,22 @@
 <?php
 
    // Check if the site is dev or qa site and save it in variables table.
-  global $base_url;
-  $environ = 'prod';
-  if ((strpos($base_url, 'https://localhost') === 0) || (strpos($base_url, 'http://localhost') === 0)) {
-    $environ = 'dev';
-  }
-  if ((strpos($base_url, 'https://dev-') === 0) || (strpos($base_url, 'http://dev-') === 0) || (strpos($base_url, '-dev') === 0)) {
-    $environ = 'dev';
-  }
-  if ((strpos($base_url, 'https://qa-') === 0) || (strpos($base_url, 'http://qa-') === 0) || (strpos($base_url, '-qa') === 0) ) {
-    $environ = 'qa';
-  }
-  if ((strpos($base_url, 'https://test-') === 0) || (strpos($base_url, 'http://test-') === 0)) {
-    $environ = 'qa';
-  }
   
-  variable_set('siteDomain', $environ);
-
   $type = 'fieldinfo';
   $name = 'country';
   //get environment variable fro variables table
-  $environment = variable_get('siteDomain');
-  if(($environment == "qa") || ($environment == "dev")){
-    $middleware_host = "webforms-qa.asu.edu";
-  }
-  else{
-    $middleware_host = "webforms.asu.edu";
-  }
   
-  $url = "https://$middleware_host/asu_salesforce_query/api/$type/$name";
+    $middleware_host = "webforms.asu.edu";
+  
+  
+  //$url = "https://$middleware_host/asu_salesforce_query/api/$type/$name";
+  $url = "https://webforms.asu.edu/asu_salesforce_query/api/$type/$name";
 
   $ch = curl_init();
   $options = array(
     CURLOPT_URL => $url,
     CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_HTTPHEADER => array('Content-Type: text/json', 'Authorization: Basic 2415:ad704ff7a5c88441f6c4e160dbda2b4e10d7727f'),
+    CURLOPT_HTTPHEADER => array('Content-Type: text/json', 'Authorization: Basic 7755:e7acf2e698751f4cac11718d97df6ebf64b94372'),
   );  
 
 

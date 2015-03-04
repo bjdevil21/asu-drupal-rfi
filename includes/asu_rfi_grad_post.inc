@@ -1,7 +1,7 @@
 <?php
 
 function asu_rfi_grad_post($data){
-
+ 
   global $base_url;
 
   $fname = $data['first_name'];
@@ -13,14 +13,6 @@ function asu_rfi_grad_post($data){
   $form_mode = variable_get('asu_rfi_form_mode');
   $nodeid = $data['submission_nodeid'];
  
-  //check if the submission values are empty
-  if(isset($state)){
-    $state_province = $state;
-  }
-  else{
-    $state_province = '';
-  }
-  
   //mobile number
   if(isset($data['mobile_check'])){
     $mobile = str_replace('-', '', $data['mobile_check']);
@@ -69,22 +61,41 @@ function asu_rfi_grad_post($data){
   else{
     $country = '';
   }
-
+  //get athentication key
+  $mw_auth_key = variable_get('asu_rfi_form_auth_key');
+  
   //Get siteDomain variable to see if it's dev or qa site.
-  $site = variable_get('siteDomain');
+  global $base_url;
+ 
+  if ((strpos($base_url, 'https://localhost') > 0) || (strpos($base_url, 'http://localhost') > 0)) {
+    $environ = 'dev';
+  }
+  if ((strpos($base_url, 'https://dev-') > 0) || (strpos($base_url, 'http://dev-') > 0) || (strpos($base_url, '-dev') > 0)) {
+    $environ = 'dev';
+  }
+  if ((strpos($base_url, 'https://qa-') > 0) || (strpos($base_url, 'http://qa-') > 0) || (strpos($base_url, '-qa') > 0) ) {
+    $environ = 'qa';
+  }
+  if ((strpos($base_url, 'https://test-') > 0) || (strpos($base_url, 'http://test-') > 0)) {
+    $environ = 'qa';
+  }
 
    // Salesforce URL to post data to
-  if(($site == "dev") || ($site == "qa") || ($form_mode == "test") || empty($form_mode)){
+ if(($environ == "dev") || ($environ == "qa")){
      $url = 'https://requestinfo-qa.asu.edu/prospect_form_post'; 
-  }
-  else{
-    $url = 'https://requestinfo.asu.edu/prospect_form_post'; 
-  }
+ }
+ else{
+    if($form_mode == 'test'){
+      $url = 'https://requestinfo-qa.asu.edu/prospect_form_post'; 
+    }
+    else{
+      $url = 'https://requestinfo.asu.edu/prospect_form_post'; 
+    }
+ }
+ 
+ $source = $mw_auth_key;
   
-$source = '';
-   
-
-$headers = array('Content-Type' => 'application/x-www-form-urlencoded');  
+ $headers = array('Content-Type' => 'application/x-www-form-urlencoded');  
   
   // build data array to post
   $submission_data = array (
@@ -96,8 +107,8 @@ $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
 		'projectedEnrollment'=> $data['semester_name'],
                 'addressLine1' => $data['address'],
                 'city' => $city,
-                'state' => $state_province,
-                'countryOfCitizenship' => $country,
+                'state' => $state,
+                'countryOfResidence' => $country,
                 'birthdate' => $dob,
                 'militaryStatus' => $military,
                 'questions' => $comment,
@@ -107,19 +118,16 @@ $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
 		'smsNumber' => $mobile,
 		
 	);
-
  
-foreach($submission_data as $key_value => $result_array){
+  foreach($submission_data as $key_value => $result_array){
     if(($result_array == "None")){
-   
-      unset($submission_data[$key_value]);
-      
-    }
-}
+        unset($submission_data[$key_value]);
+     }
+ }
 
 
       //url to post data to salesforce
-    $curl = curl_init($url);
+ $curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); //If you don't want to use any of the return information, set to false
 	curl_setopt($curl, CURLOPT_HEADER, FALSE); //Set this to false to remove informational headers
 	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -133,37 +141,11 @@ foreach($submission_data as $key_value => $result_array){
 	$info = curl_getinfo($curl); //Used by your drupal messages below
 	
 	curl_close($curl);
-	
-	
+
 	if(strpos($response, "-1 ") == 0){
 	  $message = explode(':',$response);
-    }
-       
-       
- 
-//Get the previous page node
-$destination = drupal_get_destination();
-
-//$data_options = $_SESSION['rfi_data'];
-
-//append previous page node and append it to base url
-$goto_url = $base_url .'/'.$destination['destination'];
-
-
-/*if($info['http_code'] == 400) {
-
-		drupal_set_message( "Please fix the following issue and try submitting the form again:<br />" . $message[1], 'error');
-                $status = "Incomplete";
-		 //drupal_goto($goto_url, $data_options );
-}
-if($info['http_code'] == 500) {
-		drupal_set_message($message[1] . "<br />We have an issue with our form, and we’re working on fixing it. We apologize for the inconvenience. In the meantime, please send an email to <a href='mailto:gograd@asu.edu'>gograd@asu.edu</a> about your interest in graduate studies, and we will be glad to get you the information you need to take your next steps. Thank you.", 'error');
-		 $status = "Pending";
-               
-}*/
-
-
-
+        }
+     
 //Get the response from Salesforce. If the submission is not successfull, update the previous submission status to Incomplete
 if(($info['http_code'] == 400) || ($info['http_code'] == 500)){
    
@@ -174,33 +156,10 @@ if(($info['http_code'] == 400) || ($info['http_code'] == 500)){
     $node_wrapper->field_rfi_error_message->set($message[1]);
     $node_wrapper->save();
   
-  
-  /*  $node_status_updated = db_update('field_data_field_rfi_submission_status') 
-  ->fields(array(
-    'field_rfi_submission_status_value' => $status,
-    'field_rfi_error_message_value' => $message[1],
-  ))
-  ->condition('entity_id', $nodeid)
-  ->execute();
-  //Clear cache on field to display field's updated value on front end        
-  $cid = 'field:node:' . $nodeid;
-  cache_clear_all($cid, 'cache_field');
-  */
 }
 
 if(($info['http_code'] == 200)){
-  // unset($_SESSION['rfi_data']);
-   /* $node_status_updated = db_update('field_data_field_rfi_submission_status') 
-  ->fields(array(
-    'field_rfi_submission_status_value' => 'SF_Complete',
-    'field_rfi_error_message_value' => '',
-  ))
-  ->condition('entity_id', $nodeid)
-  ->execute();
-  //Clear cache on field to display field's updated value on front end        
-  $cid = 'field:node:' . $nodeid;
-  cache_clear_all($cid, 'cache_field');*/
-   
+ 
     $node = node_load($nodeid);
     $node_wrapper = entity_metadata_wrapper('node', $node);
     $node_wrapper->field_rfi_submission_status->set('SF_Complete');
