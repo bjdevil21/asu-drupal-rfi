@@ -211,7 +211,7 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
     if(($instance_settings['form_type'] == 'current_undergrad_form') || ($instance_settings['form_type'] == 'current_grad_form')){
        $form_type = $instance_settings['form_type'];
        $block['subject'] = t('Current Student Form');
-       module_load_include('inc', 'asu_rfi', 'includes/asu_rfi.pages');
+      module_load_include('inc', 'asu_rfi', 'includes/asu_rfi.pages');
       // TODO Load the RFI form in this block.
       $block['content'] = asu_rfi_current_form($delta, $programs, $form_type);
     }
@@ -637,7 +637,7 @@ function asu_rfi_repost_rfi($data) {
         $gradpost['first_name'] = $node->field_rfi_first_name['und'][0]['value'];
         $gradpost['last_name'] = $node->field_rfi_last_name['und'][0]['value'];
         $gradpost['email'] = $node->field_rfi_email['und'][0]['value'];
-        $gradpost['birthdate'] = $node->field_rfi_dob['und'][0]['value'];
+        $gradpost['birthdate'] = base64_decode($node->field_rfi_dob['und'][0]['value']);
         $gradpost['phone'] = $node->field_rfi_phone['und'][0]['value'];
         $gradpost['address'] = isset($node->field_rfi_address['und'][0]['value']) ? $node->field_rfi_address['und'][0]['value'] : '';
         $gradpost['state'] = isset($node->field_rfi_state['und'][0]['value']) ? $node->field_rfi_state['und'][0]['value'] : '';
@@ -663,7 +663,7 @@ function asu_rfi_repost_rfi($data) {
         $upost['first_name'] = $node->field_rfi_first_name['und'][0]['value'];
         $upost['last_name'] = $node->field_rfi_last_name['und'][0]['value'];
         $upost['email'] = $node->field_rfi_email['und'][0]['value'];
-        $upost['birthdate'] = $node->field_rfi_dob['und'][0]['value'];
+        $upost['birthdate'] = base64_decode($node->field_rfi_dob['und'][0]['value']);
         $upost['phone'] = $node->field_rfi_phone['und'][0]['value'];
         $upost['address'] = isset($node->field_rfi_address['und'][0]['value']) ? $node->field_rfi_address['und'][0]['value'] : '';
         $upost['state'] = isset($node->field_rfi_state['und'][0]['value']) ? $node->field_rfi_state['und'][0]['value'] : '';
