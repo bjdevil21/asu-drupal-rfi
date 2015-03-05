@@ -1,12 +1,11 @@
 (function ($) {
     Drupal.behaviors.asu_rfi_disbutton = {
         attach: function (context, settings) {
-          //Code to hide empty date of birth li alert text
+          //Code to ide empty date of birth li alert text
          if($('#asu-rfi-long-form-data').length || $('#asu-rfi-form-data').length){
           if  ($('.alert-block').length) {
             $(".alert-block ul li").each(function(){
             if ($(this).text().length == 1) {
-                alert($(this).text());
                 $(this).hide();
             }
           })

@@ -701,7 +701,7 @@ function asu_rfi_second_form($form, &$form_state){
 	    unset($_SESSION['rfi_data']);
 	    unset($form_state['values']);
 	    unset($form_state['storage']);
-	    drupal_set_message('Your session has expired, please fill out the form again');
+	    drupal_set_message(t('Your session has expired, please fill out the form again'), 'error');
 	     $form_state['storage']['step'] = 'asu_rfi_form_data';
 	}
      }
@@ -878,8 +878,8 @@ function asu_rfi_second_form_submit($form, &$form_state){
 	if($session_diff >= 300){
 	    unset($_SESSION['rfi_data']);
 	     unset($form_state['values']);
-	    unset($form_state['storage']);
-	    drupal_set_message('Your session has expired, please fill out the form again.');
+	     unset($form_state['storage']);
+	     drupal_set_message(t('Your session has expired, please fill out the form again'), 'error');
 	}
     else{
     
@@ -963,7 +963,14 @@ function asu_rfi_second_form_submit($form, &$form_state){
      $grad_confid =  variable_get('asu_rfi_grad_confirm_node');
     
       if(!empty($grad_confid)){
-	drupal_goto("node/$grad_confid/$coded_college/$coded_major/$coded_nid/$coded_college_code ");
+	$galias = drupal_lookup_path('alias', $path = "node/$grad_confid", $path_language = NULL);
+        if(!empty($alias)){
+	    drupal_goto("$galias",array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
+	else{
+	    drupal_goto("node/$grad_confid",array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
+	
      }
     else{
 	 drupal_goto("degree-programs/request-info-thank-you/$coded_nid");
@@ -977,8 +984,15 @@ function asu_rfi_second_form_submit($form, &$form_state){
     
      asu_rfi_undergrad_post($form_state['storage']); //-- To be used in future
      $undergrad_confid = variable_get('asu_rfi_undergrad_confirm_node');
+     
      if(!empty($undergrad_confid)){
-	drupal_goto("node/$undergrad_confid/$coded_college/$coded_major/$coded_nid/$coded_college_code ");
+	$ualias = drupal_lookup_path('alias', $path = "node/$undergrad_confid", $path_language = NULL);
+	if(!empty($ualias)){
+	    drupal_goto("$ualias",array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
+	else{
+	    drupal_goto("node/$undergrad_confid", array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
      }
      else{
 	drupal_goto("degree-programs/request-info-thank-you/$coded_nid");
@@ -1614,7 +1628,13 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
      asu_rfi_grad_post($form_state['values']);
       $grad_confid =  variable_get('asu_rfi_grad_confirm_node');
       if(!empty($grad_confid)){
-	drupal_goto("node/$grad_confid/$coded_college/$coded_major/$coded_nid/$coded_college_code ");
+	$galias = drupal_lookup_path('alias', $path = "node/$grad_confid_confid", $path_language = NULL);
+	if(!empty($galias)){
+	    drupal_goto("$galias", array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
+	else{
+	   drupal_goto("node/$grad_confid",array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode"'=> $coded_college_code)));
+	}
       }
       else{
 	 drupal_goto("degree-programs/request-info-thank-you/$coded_nid");
@@ -1626,7 +1646,14 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
      asu_rfi_undergrad_post($form_state['values']);
      $undergrad_confid = variable_get('asu_rfi_undergrad_confirm_node');
      if(!empty($undergrad_confid)){
-	drupal_goto("node/$undergrad_confid/$coded_college/$coded_major/$coded_nid/$coded_college_code ");
+	$ualias = drupal_lookup_path('alias', $path = "node/$undergrad_confid", $path_language = NULL);
+	if(!empty($ualias)){
+	    drupal_goto("$ualias", array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode'=> $coded_college_code)));
+	}
+	else{
+	    drupal_goto("node/$undergrad_confid", array('query' => array('pro' => $coded_college, 'maj' => $coded_major, 'sub' => $coded_nid, 'ccode"'=> $coded_college_code)));
+	}
+	
      }
      else{
 	drupal_goto("degree-programs/request-info-thank-you/$coded_nid");

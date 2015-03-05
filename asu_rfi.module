@@ -1066,12 +1066,18 @@ function asu_rfi_preprocess_page(&$variables) {
     $undergrad_confirm_nid = variable_get('asu_rfi_undergrad_confirm_node');
     $grad_confirm_nid = variable_get('asu_rfi_grad_confirm_node');
     if (isset($variables['node']) && ($variables['node']->nid == $undergrad_confirm_nid || $variables['node']->nid == $grad_confirm_nid)) {
-       $college = base64_decode(arg(2));
+      /* $college = base64_decode(arg(2));
        $college_code = base64_decode(arg(5));
        $college_rfi = $college." - RFI";
        $major = base64_decode(arg(3));
        $sku = $college_code.$major;
-       $nid = base64_decode(arg(4));
+       $nid = base64_decode(arg(4));*/
+       $college = base64_decode($_GET['pro']);
+       $college_code = base64_decode($_GET['ccode']);
+       $college_rfi = $college." - RFI";
+       $major = base64_decode($_GET['maj']);
+       $sku = $college_code.$major;
+       $nid = base64_decode($_GET['sub']);
        $ga_id = variable_get('asu_rfi_google_analytics_key').'-'.$nid ;
        
        //GMT transaction variables

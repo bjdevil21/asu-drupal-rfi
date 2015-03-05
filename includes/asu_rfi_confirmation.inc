@@ -45,7 +45,7 @@ function asu_rfi_confirmation($nid){
    
  
 //GMT transaction variables
-drupal_add_js("(function ($) {  SI_dataLayer.push({ 'ecommerce': { 'purchase': { 'actionField': { 'id': '$ga_id', 'affiliation': '$program_name','revenue': '100', },'products': [{ 'name': '$college', 'id': '$ga_id', 'price': '100','quantity': '1',}]}}})})(jQuery)", array('type' => 'inline', 'scope' => 'footer','weight' => 5));
+drupal_add_js("(function ($) {  SI_dataLayer.push({ 'ecommerce': { 'purchase': { 'actionField': { 'transactionId': '$ga_id', 'transactionAffiliation': '$program_name','revenue': '100', },'transactionProducts': [{ 'name': '$college', 'id': '$ga_id', 'price': '100','quantity': '1',}]}}})})(jQuery)", array('type' => 'inline', 'scope' => 'footer','weight' => 5));
  
 return $confirm_message;
 
