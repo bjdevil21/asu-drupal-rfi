@@ -1066,20 +1066,14 @@ function asu_rfi_preprocess_page(&$variables) {
     $undergrad_confirm_nid = variable_get('asu_rfi_undergrad_confirm_node');
     $grad_confirm_nid = variable_get('asu_rfi_grad_confirm_node');
     if (isset($variables['node']) && ($variables['node']->nid == $undergrad_confirm_nid || $variables['node']->nid == $grad_confirm_nid)) {
-      /* $college = base64_decode(arg(2));
-       $college_code = base64_decode(arg(5));
-       $college_rfi = $college." - RFI";
-       $major = base64_decode(arg(3));
-       $sku = $college_code.$major;
-       $nid = base64_decode(arg(4));*/
+      if(isset($_GET['pro']) || isset($_GET['ccode']) || isset($_GET['maj']) || isset($_GET['sub'])){
        $college = base64_decode($_GET['pro']);
-       $college_code = base64_decode($_GET['ccode']);
        $college_rfi = $college." - RFI";
+       $college_code = base64_decode($_GET['ccode']);
        $major = base64_decode($_GET['maj']);
        $sku = $college_code.$major;
        $nid = base64_decode($_GET['sub']);
        $ga_id = variable_get('asu_rfi_google_analytics_key').'-'.$nid ;
-       
        //GMT transaction variables
       drupal_add_js("(function ($) {  SI_dataLayer.push({
                     'ecommerce': {
@@ -1087,5 +1081,5 @@ function asu_rfi_preprocess_page(&$variables) {
                     'actionField': {
                     'transactionId': '$ga_id', 'transactionAffiliation': '$college','revenue': '100', },'transactionProducts': [{ 'sku' : '$sku','name': '$college_rfi', 'id': '$ga_id', 'price': '100','quantity': '1',}]}}})})(jQuery)", array('type' => 'inline', 'scope' => 'footer','weight' => 5));
       }
-   
-  }
+    }
+}

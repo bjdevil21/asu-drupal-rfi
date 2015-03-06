@@ -436,53 +436,59 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   
  if(empty($zip)){
     if(!empty($country) && ($country == "United States")){
-	form_set_error('zipcode', t('Zip code  field is required'));
+	form_set_error('zipcode', t('Postal code field is required'));
     }
   }
   
   if(!empty($zip)){
    if( !preg_match("/^[a-zA-Z0-9\._-\s+-]+$/",$zip)){
-        form_set_error('zipcode', t('Zip code is not valid'));
+        form_set_error('zipcode', t('Postal code is not valid'));
     }
     if((strlen($zip) < 4)){
-	form_set_error('zipcode', t('Zip code cannot be less than 5 characters'));
+	form_set_error('zipcode', t('Postal code cannot be less than 4 characters'));
      }
-     if(strlen($zip) > 15){
-	form_set_error('zipcode', t('Zip code cannot be longer than 10 characters'));
+     if(strlen($zip) > 20){
+	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
   }
   
-  //validate birtdate
+  //validate birthdate
   if(!empty($birthdate)){
-   if(strlen($birthdate) < 10){
     $date_format = explode('/',$birthdate);
-    
     $month = $date_format[0];
+    $day = $date_format[1];
+    $year = $date_format[2];
+    
+   if(strlen($birthdate) < 11){
+    
     if(($month < 1) || ($month > 12)){
       form_set_error('birthdate', t('Month range has to be between 1 and 12'));
       form_set_error('dob_field',t(' '));
     }
-    $day = $date_format[1];
+    
     if(($day < 1) || ($day > 31)){
       form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month'));
       form_set_error('dob_field',t(' '));
     }
-    $last_year = date('Y') - 5;
-    $year = $date_format[2];
-    if(($day > $last_year)){
-      form_set_error('birthdate', t("Year cannot be greater than $last_year"));
-      form_set_error('dob_field',t(' '));
+   
+    if(strlen($year) != 4){
+	 form_set_error('birthdate', t('Year has to be 4 digits'));
     }
     
     if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
         form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy'));
 	form_set_error('dob_field',t(' '));
+     }
     }
-  }
+    else{
+      form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
+      form_set_error('dob_field',t(' '));
+     }
   }
   else{
-     form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
-     form_set_error('dob_field',t(' '));
+      form_set_error('birthdate', t('Date of birth is required'));
+      form_set_error('dob_field',t(' '));
+      
   }
   
 }
@@ -773,7 +779,7 @@ function asu_rfi_second_form($form, &$form_state){
   
    $form['address_info']['zipcode'] = array(
 	'#type' => 'textfield',
-	'#title' => t('Zip code'),
+	'#title' => t('Postal code'),
 	'#size' => 30,
 	'#maxlength' => 15,
 	'#default_value' => $form_state['storage']['zipcode'],
@@ -846,13 +852,13 @@ function asu_rfi_second_form_validate($form,&$form_state){
    //validate zip code
   if(!empty($zip)){
    if( !preg_match("/^[a-zA-Z0-9\._-\s+-]+$/",$zip)){
-        form_set_error('zipcode', t('Zip code is not valid'));
+        form_set_error('zipcode', t('Postal code is not valid'));
     }
     if((strlen($zip) < 4)){
-	form_set_error('zipcode', t('Zip code cannot be less than 5 characters'));
+	form_set_error('zipcode', t('Postal code cannot be less than 4 characters'));
      }
-     if(strlen($zip) > 15){
-	form_set_error('zipcode', t('Zip code cannot be longer than 10 characters'));
+     if(strlen($zip) > 20){
+	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
   }
 
@@ -1391,52 +1397,57 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   //validate zip code
   if(empty($zip)){
     if(!empty($country) && ($country == "United States")){
-	form_set_error('zipcode', t('Zip code  field is required'));
+	form_set_error('zipcode', t('Postal code field is required'));
     }
   }
   
   if(!empty($zip)){
     if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$zip)){
-        form_set_error('zipcode', t('Zip code is not valid'));
+        form_set_error('zipcode', t('Postal code is not valid'));
     }
       if((strlen($zip) < 4)){
-	form_set_error('zipcode', t('Zip code cannot be less than 4 characters'));
+	form_set_error('zipcode', t('Postal code cannot be less than 4 characters'));
      }
-     if(strlen($zip) > 15){
-	form_set_error('zipcode', t('Zip code cannot be longer than 10 characters'));
+     if(strlen($zip) > 20){
+	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
   }
   
-  //validate birtdate
+  //validate birthdate
   if(!empty($birthdate)){
-   if(strlen($birthdate) < 10){
     $date_format = explode('/',$birthdate);
-    
     $month = $date_format[0];
+    $day = $date_format[1];
+    $year = $date_format[2];
+    
+   if(strlen($birthdate) < 11){
+    
     if(($month < 1) || ($month > 12)){
       form_set_error('birthdate', t('Month range has to be between 1 and 12'));
       form_set_error('dob_field',t(' '));
     }
-    $day = $date_format[1];
+    
     if(($day < 1) || ($day > 31)){
       form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month'));
       form_set_error('dob_field',t(' '));
     }
-    $last_year = date('Y') - 5;
-    $year = $date_format[2];
-    if(($day > $last_year)){
-      form_set_error('birthdate', t("Year cannot be greater than $last_year"));
-      form_set_error('dob_field',t(' '));
+   
+    if(strlen($year) != 4){
+	 form_set_error('birthdate', t('Year has to be 4 digits'));
     }
     
     if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
         form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy'));
 	form_set_error('dob_field',t(' '));
+     }
     }
-    }
+    else{
+      form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
+      form_set_error('dob_field',t(' '));
+     }
   }
   else{
-      form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
+      form_set_error('birthdate', t('Date of birth is required'));
       form_set_error('dob_field',t(' '));
       
   }
