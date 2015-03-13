@@ -391,6 +391,14 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   $birthdate = $form_state['values']['birthdate'];
   $mobile_check = $form_state['values']['mobile_check'];
   
+   //Validate student type and add css if empty if the form is in undergrad degree page
+  if($degree_type == "undergrad"){
+   if(($stype == 'None') || (empty($stype))){
+   form_set_error('student_type', t('I will be a future field is required'));
+   drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
+   }
+  }
+  
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
         form_set_error('first_name', t('First name field accepts only plain text'));
@@ -421,16 +429,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
 	form_set_error('phone', t('You entered an invalid Phone number'));
    }
   }
-  
-  
-  //Validate student type and add css if empty if the form is in undergrad degree page
-  if($degree_type == "undergrad"){
-   if(($stype == 'None') || (empty($stype))){
-   form_set_error('student_type', t('I will be a future field is required'));
-   drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
-   }
-  }
-  
+
   
   //validate zip code
   
@@ -441,7 +440,13 @@ function asu_rfi_form_data_validate($form, &$form_state) {
   }
   
   if(!empty($zip)){
-   if( !preg_match("/^[a-zA-Z0-9\._-\s+-]+$/",$zip)){
+   if($country == "United States"){
+     if((strlen($zip) < 5)){
+	form_set_error('zipcode', t('Postal code cannot be less than 5 characters'));
+     }
+   }
+   else{
+    if( !preg_match("/^[a-zA-Z0-9\._-\s+-]+$/",$zip)){
         form_set_error('zipcode', t('Postal code is not valid'));
     }
     if((strlen($zip) < 4)){
@@ -450,10 +455,15 @@ function asu_rfi_form_data_validate($form, &$form_state) {
      if(strlen($zip) > 20){
 	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
+   }
   }
   
-  //validate birthdate
-  if(!empty($birthdate)){
+   //validate birthdate
+  
+  if(!empty($birthdate)){ 
+    //get number of occurences of '/' in dob
+   $slashes = substr_count($birthdate, '/');
+   if($slashes == 2){
     $date_format = explode('/',$birthdate);
     $month = $date_format[0];
     $day = $date_format[1];
@@ -461,34 +471,39 @@ function asu_rfi_form_data_validate($form, &$form_state) {
     
    if(strlen($birthdate) < 11){
     
-    if(($month < 1) || ($month > 12)){
+     if(($month < 1) || ($month > 12)){
       form_set_error('birthdate', t('Month range has to be between 1 and 12'));
       form_set_error('dob_field',t(' '));
-    }
+     }
     
-    if(($day < 1) || ($day > 31)){
+     if(($day < 1) || ($day > 31)){
       form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month'));
       form_set_error('dob_field',t(' '));
-    }
+     }
    
-    if(strlen($year) != 4){
+     if(strlen($year) != 4){
 	 form_set_error('birthdate', t('Year has to be 4 digits'));
-    }
+     }
     
-    if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
+     if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
         form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy'));
 	form_set_error('dob_field',t(' '));
-     }
+      }
     }
-    else{
+   else{
       form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
       form_set_error('dob_field',t(' '));
      }
+  
+   }
+   else{
+     form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
+     form_set_error('dob_field',t(' '));
+   }
   }
-  else{
+ else{
       form_set_error('birthdate', t('Date of birth is required'));
       form_set_error('dob_field',t(' '));
-      
   }
   
 }
@@ -830,7 +845,7 @@ function asu_rfi_second_form_validate($form,&$form_state){
       drupal_add_js("$('html, body').animate({ scrollTop: $('#asu-rfi-form-data').offset().top - 100}, 1000);",'inline');
       return TRUE;
    }
-   
+   $stcountry = $form_state['storage']['country'];
    $address = check_plain($form_state['values']['address']);
    $city = check_plain($form_state['values']['city']);
    $state = check_plain($form_state['values']['state']);
@@ -849,23 +864,37 @@ function asu_rfi_second_form_validate($form,&$form_state){
    }
   } 
   
-   //validate zip code
-  if(!empty($zip)){
-   if( !preg_match("/^[a-zA-Z0-9\._-\s+-]+$/",$zip)){
-        form_set_error('zipcode', t('Postal code is not valid'));
+
+ //validate zip code
+  if(empty($zip)){
+    if(!empty($stcountry) && ($stcountry == "United States")){
+	form_set_error('zipcode', t('Postal code field is required'));
     }
-    if((strlen($zip) < 4)){
+  }
+  
+  if(!empty($zip)){
+    if($stcountry == "United States"){
+     if((strlen($zip) < 5)){
+	form_set_error('zipcode', t('Postal code cannot be less than 5 characters'));
+     }
+    }
+  else{
+    if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$zip)){
+        form_set_error('zipcode', t('Postal code is not valid'));
+     }
+      if((strlen($zip) < 4)){
 	form_set_error('zipcode', t('Postal code cannot be less than 4 characters'));
      }
      if(strlen($zip) > 20){
 	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
+   }
   }
 
    //validate comments
    if(!empty($form_state['values']['questions'])){
      if(strlen($form_state['values']['questions']) > 255){
-      form_set_error('questions', t('Comments field exceeded 255 characters limit'));
+      form_set_error('questions', t('Comments can be maximum 255 characters long'));
     }
    
   }
@@ -1354,6 +1383,14 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    $birthdate = $form_state['values']['birthdate'];
    $mobile_check = $form_state['values']['mobile_check'];
    
+    //Validate student type and add css if empty
+  if($form_type == 'ugrad_longform'){
+  if($stype == 'None'){
+    form_set_error('student_type', t('I will be a future field is required'));
+    drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
+   }
+  }
+   
   //validate first name
    if( !preg_match("/^[a-zA-Z\._-\s]+$/",$fname)){
         form_set_error('first_name', t('First name field accepts only plain text'));
@@ -1386,13 +1423,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    }
   }
   
-  //Validate student type and add css if empty
-  if($form_type == 'ugrad_longform'){
-  if($stype == 'None'){
-    form_set_error('student_type', t('I will be a future field is required'));
-    drupal_add_css('#edit-stu-type{ border: 2px solid red;}',$option['type'] = 'inline');
-   }
-  }
+ 
   
   //validate zip code
   if(empty($zip)){
@@ -1402,19 +1433,30 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
   }
   
   if(!empty($zip)){
+    if($country == "United States"){
+     if((strlen($zip) < 5)){
+	form_set_error('zipcode', t('Postal code cannot be less than 5 characters'));
+     }
+    }
+  else{
     if( !preg_match("/^[a-zA-Z0-9\._-\s]+$/",$zip)){
         form_set_error('zipcode', t('Postal code is not valid'));
-    }
+     }
       if((strlen($zip) < 4)){
 	form_set_error('zipcode', t('Postal code cannot be less than 4 characters'));
      }
      if(strlen($zip) > 20){
 	form_set_error('zipcode', t('Postal code cannot be longer than 20 characters'));
      }
+   }
   }
   
   //validate birthdate
-  if(!empty($birthdate)){
+  
+  if(!empty($birthdate)){ 
+    //get number of occurences of '/' in dob
+   $slashes = substr_count($birthdate, '/');
+   if($slashes == 2){
     $date_format = explode('/',$birthdate);
     $month = $date_format[0];
     $day = $date_format[1];
@@ -1422,35 +1464,40 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
     
    if(strlen($birthdate) < 11){
     
-    if(($month < 1) || ($month > 12)){
+     if(($month < 1) || ($month > 12)){
       form_set_error('birthdate', t('Month range has to be between 1 and 12'));
       form_set_error('dob_field',t(' '));
-    }
+     }
     
-    if(($day < 1) || ($day > 31)){
+     if(($day < 1) || ($day > 31)){
       form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month'));
       form_set_error('dob_field',t(' '));
-    }
+     }
    
-    if(strlen($year) != 4){
+     if(strlen($year) != 4){
 	 form_set_error('birthdate', t('Year has to be 4 digits'));
-    }
+     }
     
-    if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
+     if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
         form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy'));
 	form_set_error('dob_field',t(' '));
-     }
+      }
     }
-    else{
+   else{
       form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
       form_set_error('dob_field',t(' '));
      }
+  
+   }
+   else{
+     form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy'));
+     form_set_error('dob_field',t(' '));
+   }
   }
-  else{
+ else{
       form_set_error('birthdate', t('Date of birth is required'));
       form_set_error('dob_field',t(' '));
-      
-  }
+  }  
     
    //validate address
   if(!empty($address)){
@@ -1472,7 +1519,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
-	form_set_error('questions', t('Questions field can take upto 255 characters long'));
+	form_set_error('questions', t('Comments can be maximum 255 characters long'));
     }
    
   }
@@ -1833,7 +1880,7 @@ function asu_rfi_current_form_data_validate($form,&$form_state){
    $len =  strlen($questions); // validation for comments character limit to 255
    if ($len > 255) 
     {
-	form_set_error('questions', t('Questions field can take upto 255 characters long'));
+	form_set_error('questions', t('Comments can be maximum 255 characters long'));
     }
   }
 }
