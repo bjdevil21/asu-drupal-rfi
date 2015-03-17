@@ -24,3 +24,4 @@ projects[mimemail][subdir] = contrib
 ; pre-req for mimemail
 projects[mailsystem][version] = 2.34
 projects[mailsystem][type] = module
+projects[mailsystem][subdir] = contrib
