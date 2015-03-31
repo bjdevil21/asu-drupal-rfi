@@ -80,6 +80,7 @@ function asu_rfi_install(){
     $out = $out . "\r\nasu_rfi/success/*\r\nasu_rfi/failure/*";
     variable_set('cas_exclude',$out);
   }
+  variable_set('asu_rfi_form_mode','test');
 }
 
 function asu_rfi_uninstall(){

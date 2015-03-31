@@ -118,6 +118,16 @@ function asu_rfi_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/asu_rfi.backpost.inc',
    );
+   
+   //menu to grab middle ware key
+   
+   $items["asu_rfi/key/%"] = array(
+    'page callback' => 'asu_rfi_middle_key',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/asu_rfi.backpost.inc',
+   );
  
 
   return $items;
@@ -236,7 +246,7 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
 
   switch ($delta) {
     case 'asu_rfi_form_block':
-      drupal_flush_all_caches();
+     // drupal_flush_all_caches();
       $multi_id = $multi_id ? $multi_id : NULL;
       $instance_settings = asu_rfi_get_block_instance_settings($multi_id);
       
@@ -269,8 +279,12 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
                           );
      }
      else{
+     
      }
-    
+     $current_page = $_SERVER['REQUEST_URI'];
+     if(empty($form_types)){
+       header("Location: $current_page");
+     }
       $form_type_settings = $instance_settings['form_type'] ? $instance_settings['form_type'] : NULL;
       $form['asu_rfi_form_block_type'] = array(
         '#type' => 'radios',
@@ -531,14 +545,16 @@ function asu_rfi_cron() {
   $query->entityCondition('entity_type', 'node')
     ->entityCondition('bundle', 'asu_rfi')
     // Don't let this keep happening forever if we have permanent failure.
-    ->propertyCondition('changed', array('changed + INTERVAL 15 MINUTE', time() - 864000), 'BETWEEN') // Created in the last 10 days (432000 = 10(24 * 3600)).
+    //->propertyCondition('changed', array('changed + INTERVAL 15 MINUTE', time() + 864000), 'BETWEEN') // Created in the last 10 days (432000 = 10(24 * 3600)).
+    ->propertyCondition('created', array( REQUEST_TIME - 864000, REQUEST_TIME - 900), 'between') // Created in the last 10 days (432000 = 10(24 * 3600)).
+    ->propertyCondition('changed', array(REQUEST_TIME - 864000, REQUEST_TIME), 'between') // changed in the last 10 days (432000 = 10(24 * 3600)).
+    ->propertyOrderBy('created', 'DESC')
     ->fieldCondition('field_rfi_submission_status', 'value', array('Incomplete','Pending'), 'IN') // Failed lead.
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
      $results = $query->execute();
  
   // Add failed leads to the cron jobs queue.
   if (isset($results['node'])) {
-
     // For each failed lead, add it to the asu_rfi_failed_leads_queue.
     foreach ($results['node'] as $key => $failed_rfi_lead) {
       $queue->createItem($failed_rfi_lead);
@@ -604,7 +620,7 @@ function asu_rfi_cron_queue_info() {
   
   $queues['asu_rfi_failed_leads_queue'] = array(
     'worker callback' => 'asu_rfi_repost_rfi', // Function to call, each item.
-    'time' => 10, // Seconds to spend working on the queue.
+    'time' => 20, // Seconds to spend working on the queue.
   );
   
 
@@ -704,8 +720,19 @@ FORMS
 
 function asu_rfi_form_alter(&$form, &$form_state, $form_id){
   
+  //below code adds css to ajax preview of rfi forms in the panels preview page
+  $form_exists = strpos($form['#id'], 'asu-rfi-long-form-data--');
+  $ctools_div_exists = strpos($form['#id'], 'ctools-block-content-type-edit-form');
+  $current_form_exists = strpos($form['#id'], 'asu-rfi-current-form-data-');
+  if((($form_exists  == 0) && ($ctools_div_exists == 0)) || (($current_form_exists == 0) && ($ctools_div_exists == 0))){
+    drupal_add_css('#modal-content fieldset.widget-preview-single .fieldset-wrapper{ max-height: 1975px !important;}', array('type' => 'inline'));
+    drupal_add_css('#modal-content .widget-preview .fieldset-wrapper{ max-height: 75% !important;}', array('type' => 'inline'));
+  }
+  ////
+  
   //Change form type exposed filter in submssions view (/asu-rfi-submissions-report) form text field to select option   
   if($form['#id'] == 'views-exposed-form-asu-rfi-submissions-report-page'){
+    
    $form_types =  array('' => ' - All -');
     $form_types_query = db_query('select DISTINCT field_rfi_form_type_value from {field_data_field_rfi_form_type}');
     foreach($form_types_query as $form_types_options){
@@ -724,6 +751,15 @@ function asu_rfi_form_alter(&$form, &$form_state, $form_id){
       if($form['#prefix'] == '<div id="rfi_second_form">'){
         drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.js','file');
       }
+    }
+    
+    if($form['#id'] == "asu-rfi-long-form-data"){
+      drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/session_clear.js','file');
+      $form['#after_build'][] = 'asu_rfi_form_after_build';
+    }
+    
+    if($form['#id'] == "asu-rfi-form-data"){
+      $form['#after_build'][] = 'asu_rfi_form_after_build';
     }
     
    
@@ -1038,7 +1074,7 @@ function asu_rfi_views_api() {
 }
 
 /** Implementation of hook_js_alter
- * Form API #states works only with Jquery 1.5, so altering JS version only form ASU RFI blokc settings pahe to jQuery 1.5 or core.
+ * Form API #states works only with Jquery 1.5, so altering JS version only form ASU RFI block settings page to jQuery 1.5 or core.
  *
  *
 */
@@ -1062,24 +1098,106 @@ function asu_rfi_js_alter(&$javascript) {
   
 }
 
+//fucntion to send data transaction variable SI_dataLayer to GTM tag
 function asu_rfi_preprocess_page(&$variables) {
+
+  //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the url, load the node and get the vraibles. Add google analytics code to the header. 
+  if($variables['theme_hook_suggestions'][1] == "page__degree_programs__request_info_thank_you"){
+    $nodeid = base64_decode(arg(2));
+  
+    //get the node data 
+     $query = new EntityFieldQuery();
+     $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'asu_rfi')
+    ->propertyCondition('nid', $nodeid)
+    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+   
+     $result = $query->execute();
+     if (isset($result['node'])) {
+      $items_nids = array_keys($result['node']);
+      $items = entity_load('node', $items_nids);
+    }
+ 
+    $out = array();
+    foreach ($items as $nid => $submissions) {
+      $sub_wrapper = entity_metadata_wrapper('node', $submissions);
+      $plan_code = $sub_wrapper->field_rfi_program->value();
+      $program_code = $sub_wrapper->field_rfi_college_code->value();
+      $program_name = $sub_wrapper->field_rfi_college_name->value();
+      $prospect_level = $sub_wrapper->field_rfi_prospect_level->value();
+    }
+    $college = $program_code.'-RFI';
+    $sku = $program_code.$plan_code.'-RFI';
+    $ga_id = variable_get('asu_rfi_google_analytics_key').'-'.$nid ;
+    if($prospect_level == "Undergraduate"){
+      $category  = 'UG RFI';
+    }
+    if($prospect_level == "Graduate"){
+      $category  = 'Grad RFI';
+    }
+    
+    drupal_add_js("(function ($) { 
+       SI_dataLayer = [{
+          'transactionId': '$ga_id',
+          'transactionAffiliation': '$program_name',
+          'transactionTotal': 100.00, 
+          'transactionProducts': [{
+                'sku': '$sku', 
+                'name': '$college',  
+                'category': '$category',
+                'price': 100.00, 
+                'quantity': 1
+              }]
+            }];
+        })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
+  }
+   
+   //if confirmation node id specified in module settings page is called instead, run below code
+   else
+   {
     $undergrad_confirm_nid = variable_get('asu_rfi_undergrad_confirm_node');
     $grad_confirm_nid = variable_get('asu_rfi_grad_confirm_node');
-    if (isset($variables['node']) && ($variables['node']->nid == $undergrad_confirm_nid || $variables['node']->nid == $grad_confirm_nid)) {
-      if(isset($_GET['pro']) || isset($_GET['ccode']) || isset($_GET['maj']) || isset($_GET['sub'])){
+    if (isset($variables['node']) && ($variables['node']->nid == $undergrad_confirm_nid || $variables['node']->nid == $grad_confirm_nid))
+    {
+      if(isset($_GET['pro']) || isset($_GET['ccode']) || isset($_GET['maj']) || isset($_GET['sub']))
+      {
        $college = base64_decode($_GET['pro']);
        $college_rfi = $college." - RFI";
        $college_code = base64_decode($_GET['ccode']);
        $major = base64_decode($_GET['maj']);
-       $sku = $college_code.$major;
+       $major_rfi = $major.'-RFI';
+       $sku = $college_code.$major.'-RFI';
        $nid = base64_decode($_GET['sub']);
+       $category = $_GET['cat'];
        $ga_id = variable_get('asu_rfi_google_analytics_key').'-'.$nid ;
        //GMT transaction variables
-      drupal_add_js("(function ($) {  SI_dataLayer.push({
-                    'ecommerce': {
-                    'purchase': {
-                    'actionField': {
-                    'transactionId': '$ga_id', 'transactionAffiliation': '$college','revenue': '100', },'transactionProducts': [{ 'sku' : '$sku','name': '$college_rfi', 'id': '$ga_id', 'price': '100','quantity': '1',}]}}})})(jQuery)", array('type' => 'inline', 'scope' => 'footer','weight' => 5));
+       drupal_add_js("(function ($) { 
+         SI_dataLayer = [{
+            'transactionId': '$ga_id',
+            'transactionAffiliation': '$college',
+            'transactionTotal': '100.00', 
+            'transactionProducts': [{
+               'sku': '$sku', 
+               'name': '$major_rfi', 
+               'category': '$category',
+               'price': 100.00, 
+               'quantity': 1
+             }]
+        }];
+      })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
       }
     }
+   }
+}
+
+/* Implementation of hook form_after_build to remove requirement on student type field for Grad forms */
+
+function asu_rfi_form_after_build($form, &$form_state) {
+  
+  if(($form['degree_type']['#default_value'] == "graduate_longform") || ($form['degree_type']['#default_value'] == "graduate")) {
+      $form['my_interest']['student_type']['#required'] = FALSE;
+      $form['my_interest']['student_type']['#needs_validation'] = FALSE;
+  }
+  
+ return $form;
 }

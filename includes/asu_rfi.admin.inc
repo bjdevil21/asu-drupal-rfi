@@ -15,7 +15,7 @@ function asu_rfi_admin_settings($form_state){
   
    $form['form_stage'] = array(
 	'#type' => 'item',
-        '#markup' => t('<div class="rfi_note">Important: The RFI submissions will not be posted to Sales force via Middleware unless Authentication code has been added. Please read below the Authentication code field for more details'),
+        '#markup' => t('<div class="rfi_note">Important: The RFI submissions will not be posted to Sales force via Middleware unless Authentication code has been added. You can request the authentication key from <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a>. Note that RFI submissions will not be posted to Sales force via Middle ware unless this code has been added</div>'),
     );                 
   
   $form['asu_rfi_form_access'] = array(
@@ -33,13 +33,13 @@ function asu_rfi_admin_settings($form_state){
     '#options' => $form_modes,
     '#default_value' => variable_get('asu_rfi_form_mode'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
-    '#description' => t("Specifiy if the form is in Test mode or Live mode."),
+    '#description' => t("Specify if the forms are in Test mode or Live mode. Note: This is a sitewide configuration and will affect all forms."),
     '#required' => TRUE,
     );
    
    //Will be enabled in future
   $form['asu_rfi_form_access']['asu_rfi_form_auth_key'] = array(
-    '#type' => 'textfield',
+    '#type' => 'hidden',
     '#title' => t('Authentication code'),
     '#default_value' => variable_get('asu_rfi_form_auth_key'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
@@ -65,7 +65,7 @@ function asu_rfi_admin_settings($form_state){
     '#default_value' => variable_get('asu_rfi_google_analytics_key'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
     '#description' => t("Enter a 6-10 character string to identify your site in Google Analytics transactions."),
-    '#required' => TRUE,
+    //'#required' => TRUE,
     '#disabled' => FALSE,
     );
    
