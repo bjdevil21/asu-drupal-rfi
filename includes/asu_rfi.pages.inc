@@ -163,7 +163,7 @@ function asu_rfi_form_data($form, &$form_state) {
 	$form['my_interest']['student_type'] = array(
 	    '#type' => 'select',
 	    '#title' => t('I will be a future'),
-	    '#options' => array('None'=>'Select type','First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
+	    '#options' => array('First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
 	    '#states' => array(
 		'visible' => array(
 		    ':input[name="degree_type"]' => array('value' => 'undergrad'),
@@ -1095,7 +1095,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     $form['my_interest']['student_type'] = array(
 	'#type' => 'select',
 	'#title' => t('I will be a future'),
-	'#options' => array('None'=>'Select type','First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
+	'#options' => array('First Time Freshman'=>'First Time Freshman', 'Transfer'=>'Transfer',' Readmission'=>'Readmission'),
 	'#states' => array(
 	    'visible' => array(
 		':input[name="degree_type"]' => array('value' => 'ugrad_longform'),
