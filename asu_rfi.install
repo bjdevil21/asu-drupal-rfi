@@ -77,7 +77,7 @@ function asu_rfi_install(){
   //Check if CAS module exists and enabled and update cas_exclude variables with asu_rfi callback urls
   if (module_exists('cas')) {
     $out = variable_get('cas_exclude', 'none');
-    $out = $out . "\r\nasu_rfi/success/*\r\nasu_rfi/failure/*";
+    $out = $out . "\r\nasu_rfi/success/*\r\nasu_rfi/failure/*\r\nasu_rfi/key/*";
     variable_set('cas_exclude',$out);
   }
   variable_set('asu_rfi_form_mode','test');
