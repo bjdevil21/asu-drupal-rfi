@@ -69,7 +69,7 @@ function asu_rfi_menu() {
     'file' => 'includes/asu_rfi.pages.inc',
    );
    
-   //ASU mdoules settings
+   //ASU modules settings
    $items['admin/config/asu'] = array(
   'title' => 'ASU modules',
   'description' => 'Configure ASU modules.',
@@ -189,7 +189,7 @@ function asu_rfi_block_view($delta = '', $multi_id = NULL) {
      if(!empty($instance_settings['programs'])){
        $programs = array_intersect_key($program_options,  array_flip($instance_settings['programs']));
      }
-     //If none of the programs is selected in block settings page, show all the programs in the RFi form drop down
+     //If none of the programs is selected in block settings page, show all the programs in the RFI form drop down
      else{
        $programs = $program_options;
      }
@@ -318,7 +318,7 @@ function asu_rfi_block_configure($delta = '', $multi_id = NULL) {
 	   ),
         ),
       );
-    //if grad degrees are available, populate the gard degrees field
+    //if grad degrees are available, populate the grad degrees field
     if(sizeof(variable_get('asu_rfi_graduate_degree_type')) > 0){
       $grad_program_settings = $instance_settings['grad_programs'] ? $instance_settings['grad_programs'] : NULL;
        $grad_program_options = asu_rfi_get_grad_programs();
@@ -563,7 +563,7 @@ function asu_rfi_cron() {
   }
   
   //check if the site hasn't posted submissions to salesforce for two days. If yes, send an email to administrator.
-   //Get last time site had successfull submission
+   //Get last time site had successful submission
    $last_sf_success = variable_get('last_success_SF_posting', 0); 
    $last_sf_failure = variable_get('last_failure_SF_posting', 0); 
    $timediff = $last_sf_failure - $last_sf_success ;
@@ -673,7 +673,7 @@ function asu_rfi_repost_rfi($data) {
         
        }
      
-     //repost undegrad submissions to middleware
+     //repost undergrad submissions to middleware
      
       if($node->field_rfi_prospect_level['und'][0]['value'] == "Undergraduate"){
         $upost['first_name'] = $node->field_rfi_first_name['und'][0]['value'];
@@ -730,7 +730,7 @@ function asu_rfi_form_alter(&$form, &$form_state, $form_id){
   }
   ////
   
-  //Change form type exposed filter in submssions view (/asu-rfi-submissions-report) form text field to select option   
+  //Change form type exposed filter in submissions view (/asu-rfi-submissions-report) form text field to select option   
   if($form['#id'] == 'views-exposed-form-asu-rfi-submissions-report-page'){
     
    $form_types =  array('' => ' - All -');
@@ -874,7 +874,7 @@ function asu_rfi_get_undergrad_programs() {
   
    //get the degree types from the database
       $program_type = db_query('select distinct field_asu_degree_program_value from field_data_field_asu_degree_program');
-      //set the variables so they can be used to show degree programs based on the form type selectiosn above in block settings
+      //set the variables so they can be used to show degree programs based on the form type selections above in block settings
       foreach($program_type as $programs){
           $degreetype = $programs->field_asu_degree_program_value;
           if($degreetype == "undergrad"){
@@ -924,7 +924,7 @@ function asu_rfi_get_undergrad_programs() {
   return $out;
 }
 
-//Gte grad programs if any exist
+//GTE grad programs if any exist
 function asu_rfi_get_grad_programs() {
 
  $query = new EntityFieldQuery();
@@ -1098,10 +1098,10 @@ function asu_rfi_js_alter(&$javascript) {
   
 }
 
-//fucntion to send data transaction variable SI_dataLayer to GTM tag
+//function to send data transaction variable SI_dataLayer to GTM tag
 function asu_rfi_preprocess_page(&$variables) {
 
-  //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the url, load the node and get the vraibles. Add google analytics code to the header. 
+  //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the URL, load the node and get the variables. Add Google analytics code to the header. 
   if($variables['theme_hook_suggestions'][1] == "page__degree_programs__request_info_thank_you"){
     $nodeid = base64_decode(arg(2));
   

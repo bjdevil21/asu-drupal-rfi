@@ -64,7 +64,7 @@ function asu_rfi_grad_post($data){
     else{
 	$country = '';
     }
-    //get athentication key
+    //get authentication key
     $mw_auth_key = variable_get('asu_rfi_form_auth_key');
     
     //Get siteDomain variable to see if it's dev or qa site.
@@ -146,7 +146,7 @@ function asu_rfi_grad_post($data){
 	$message = explode(':',$response);
     }
      
-    //Get the response from Salesforce. If the submission is not successfull, update the previous submission status to Incomplete
+    //Get the response from Salesforce. If the submission is not successful, update the previous submission status to Incomplete
     if(($info['http_code'] == 400) || ($info['http_code'] == 500)){
 	//update error message
 	$node = node_load($nodeid);
@@ -162,7 +162,7 @@ function asu_rfi_grad_post($data){
 	$node_wrapper->field_rfi_submission_status->set('SF_Complete');
 	$node_wrapper->field_rfi_error_message->set('');
 	$node_wrapper->save();
-       //if succesfully to post to SF, the set "last_failure_SF_posting" variable to current time
+       //if successfully to post to SF, the set "last_failure_SF_posting" variable to current time
 	variable_set('last_success_SF_posting', time());
     }
 

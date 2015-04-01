@@ -24,7 +24,7 @@ function asu_rfi_success_post($hash, $nid)
 }
 
 
-/* Fialed posts submissions update */
+/* Failed posts submissions update */
 
 function asu_rfi_fail_post($hash, $nid)
 {

@@ -184,7 +184,7 @@ function asu_rfi_email($prog_plan, $e_email){
             $map = "<br /><strong><i> Listing of Required Courses: </i> </strong> <br /><a href= ".$major_map."> <br /><strong> View major map </strong> </a><br /><br />";
             
      
-            if(!empty($additional_req)){ // check if there are any additional requirments
+            if(!empty($additional_req)){ // check if there are any additional requirements
                 $whole_body = $short_desc.$description.$wufu_data.$fee.$lang.$math_requ.$addition_req.$mari.$map.$career_format;
 	    }
             else
@@ -198,7 +198,7 @@ function asu_rfi_email($prog_plan, $e_email){
   $message_end = "</p><p> If you submitted a question on your request information form, an ASU representative will contact you soon.</p>
             
             <h4> Helpful Resources for Future Sun Devils: </h4>
-            <i> Interactive viewbook and general information: </i>
+            <i> Interactive view book and general information: </i>
             <ul><li><a href = 'http://www.asu.edu/myfuture/index-desktop.html'> My future</a>   </li>
                 <li><a href = 'http://www.asu.edu/prospective/video/'>  About ASU (Video) </a>   </li>
             </ul> <br />
@@ -241,7 +241,7 @@ function asu_rfi_email($prog_plan, $e_email){
    $params['body'] = $message_start.$message_middle.$whole_body.$message_end.$footer;
   }
 //}
- //Get email configuration varible values from the rfi admin settings page
+ //Get email configuration variable values from the rfi admin settings page
   $from_email = variable_get('asu_rfi_from_email_field');
   if(!empty($from_email)){
     $from = $from_email;

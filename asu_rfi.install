@@ -49,7 +49,7 @@ function asu_rfi_schema() {
    'description' => 'Start term dates',
    'fields' => array(
      'semId' => array(
-        'description' => 'Semeter term ID',
+        'description' => 'Semester term ID',
         'type' => 'varchar',
         'length' => 225,
         'not null' => TRUE),

@@ -25,7 +25,7 @@ function asu_rfi_undergrad_post($data)
     $domain = $_SERVER['HTTP_HOST'];
     $source = $domain.'-'.$type_of_form.'-UG';
   
-    //modile phone
+    //mobile phone
     if(isset($data['mobile_check'])){
         $mobile = str_replace('-', '', $data['mobile_check']);
     }

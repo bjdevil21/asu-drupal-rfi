@@ -1,4 +1,4 @@
-; ASU RFI makefile
+; ASU RFI make file
 
 api = 2
 core = 7.x

@@ -438,7 +438,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
     //validate birthdate
   
     if(!empty($birthdate)){ 
-	//get number of occurences of '/' in dob
+	//get number of occurrences of '/' in dob
 	$slashes = substr_count($birthdate, '/');
 	if($slashes == 2){
 	    $date_format = explode('/',$birthdate);
@@ -505,7 +505,7 @@ function asu_rfi_form_data_submit($form, &$form_state){
     $form_state['storage']['phone'] = $form_state['values']['phone'];
     $sms_opted = $form_state['values']['mobile_check'];
  
-    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
+    //check if the phone number already has 1 prepeneded. If yes, just pass phone number to sms field, else prepend 1.
     if(!empty($sms_opted)){
 	if(substr($form_state['values']['phone'], 0,1) != "1"){
 	    $form_state['storage']['mobile_check'] = '1'.$form_state['values']['phone'];
@@ -963,7 +963,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
 	    $coded_college_code = base64_encode($form_state['storage']['college_code']);
 	    
 	    /*If graduate degree is submitted, root the from to graduate posting function.
-	     *Grab the node id of cinfirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
+	     *Grab the node id of confirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
 	     */
 	    if($form_state['storage']['prospect_level'] == "Graduate"){
 		asu_rfi_grad_post($form_state['storage']);
@@ -985,7 +985,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
 	    }
 	    
 	    /*If undergraduate degree is submitted, root the from to undergraduate posting function below.
-	     *Grab the node id of cinfirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
+	     *Grab the node id of confirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
 	     */
 	    if($form_state['storage']['prospect_level'] == "Undergraduate"){
 		asu_rfi_undergrad_post($form_state['storage']); //-- To be used in future
@@ -1065,7 +1065,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     if(empty($middleware_key)){
 	$form['form_middle_post'] = array(
 	'#type' => 'item',
-        '#markup' => t('<div class="rfi_middlekey">The middleware authentication key is currently not set, it is required to post data to middleware. You can request the key fron <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a> and add the key provided at the <a href="/admin/config/asu/asurfi">RFI admin settings page</a></div>')
+        '#markup' => t('<div class="rfi_middlekey">The middleware authentication key is currently not set, it is required to post data to middleware. You can request the key from <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a> and add the key provided at the <a href="/admin/config/asu/asurfi">RFI admin settings page</a></div>')
         );
     }
     
@@ -1405,7 +1405,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    //validate birthdate
   
    if(!empty($birthdate)){ 
-	//get number of occurences of '/' in dob
+	//get number of occurrences of '/' in dob
 	$slashes = substr_count($birthdate, '/');
 	if($slashes == 2){
 	    $date_format = explode('/',$birthdate);
@@ -1493,7 +1493,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
     
     $sms_opted = $form_state['values']['mobile_check'];
   
-    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
+    //check if the phone number already has 1 prepeneded. If yes, just pass phone number to sms field, else prepend 1.
     if(!empty($sms_opted)){
 	if(substr($form_state['values']['phone'], 0,1) != "1"){
 	  $form_state['values']['mobile_check'] = '1'.$form_state['values']['phone'];
@@ -1912,7 +1912,7 @@ function asu_rfi_states_data(){
 //Function to build start dates options array
 function _asu_rfi_sem_dates(){
     
-    //Get semester dates from dabatase
+    //Get semester dates from database
     $semdates_query = db_query("select * from {asu_rfi_sem_dates} order by CHAR_LENGTH(semId)");
     foreach($semdates_query as $semester){
 	$termdate[$semester->semId] = $semester->semLabel;
