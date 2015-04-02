@@ -1129,7 +1129,7 @@ function asu_rfi_js_alter(&$javascript) {
 }
 
 //function to send data transaction variable SI_dataLayer to GTM tag
-function asu_rfi_preprocess_page(&$variables) {
+/*function asu_rfi_preprocess_page(&$variables) {
 
   //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the URL, load the node and get the variables. Add Google analytics code to the header. 
   if(isset($variables['theme_hook_suggestions'][1])){
@@ -1219,7 +1219,7 @@ function asu_rfi_preprocess_page(&$variables) {
       }
     }
    }
-}
+}*/
 
 /* Implementation of hook form_after_build to remove requirement on student type field for Grad forms */
 
