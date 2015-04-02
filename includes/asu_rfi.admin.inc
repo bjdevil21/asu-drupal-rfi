@@ -65,7 +65,7 @@ function asu_rfi_admin_settings($form_state){
     '#default_value' => variable_get('asu_rfi_google_analytics_key'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
     '#description' => t("Enter a 6-10 character string to identify your site in Google Analytics transactions."),
-    //'#required' => TRUE,
+    '#required' => TRUE,
     '#disabled' => FALSE,
     );
    

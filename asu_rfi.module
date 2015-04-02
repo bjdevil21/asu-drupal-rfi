@@ -667,6 +667,13 @@ function asu_rfi_repost_rfi($data) {
         $gradpost['zipcode'] = isset($node->field_rfi_zipcode['und'][0]['value']) ? $node->field_rfi_zipcode['und'][0]['value'] : '';
         $gradpost['mobile_check'] = isset($node->field_rfi_sms_opted['und'][0]['value']) ? $node->field_rfi_sms_opted['und'][0]['value'] : '';
         $gradpost['submission_nodeid'] = $node->nid;
+        $type_of_form = isset($node->field_rfi_form_type['und'][0]['value']) ? $node->field_rfi_form_type['und'][0]['value'] : '';
+        if($type_of_form == "Graduate long form"){
+          $gradpost['type_of_form'] = 'LF';
+        }
+        if($type_of_form == "Graduate multi form"){
+          $gradpost['type_of_form'] = 'MF';
+        }
         asu_rfi_grad_post($gradpost);
         watchdog('SF grad posting', "Posted successfully to ".$data->nid);
         variable_set('last_attempt_SF_posting', time());
@@ -693,6 +700,13 @@ function asu_rfi_repost_rfi($data) {
         $upost['zipcode'] = isset($node->field_rfi_zipcode['und'][0]['value']) ? $node->field_rfi_zipcode['und'][0]['value'] : '';
         $upost['mobile_check'] = isset($node->field_rfi_sms_opted['und'][0]['value']) ? $node->field_rfi_sms_opted['und'][0]['value'] : '';
         $upost['submission_nodeid'] = $node->nid;
+        $utype_of_form = isset($node->field_rfi_form_type['und'][0]['value']) ? $node->field_rfi_form_type['und'][0]['value'] : '';
+        if($utype_of_form == "Undergraduate long form"){
+          $upost['type_of_form'] = 'LF';
+        }
+        if($utype_of_form == "Undergraduate multi form"){
+          $upost['type_of_form'] = 'MF';
+        }
         asu_rfi_undergrad_post($upost);
         watchdog('SF undergrad posting', "Posted successfully to ".$data->nid);
         variable_set('last_attempt_SF_posting', time());
@@ -1021,16 +1035,24 @@ function asu_rfi_bulk_submit_action(&$node, $context) {
         $upost['phone'] = $node->field_rfi_phone['und'][0]['value'];
         $upost['address'] = isset($node->field_rfi_address['und'][0]['value']) ? $node->field_rfi_address['und'][0]['value'] : '';
         $upost['state'] = isset($node->field_rfi_state['und'][0]['value']) ? $node->field_rfi_state['und'][0]['value'] : '';
-        $upost['country'] = $node->field_rfi_country['und'][0]['value'];
+        $upost['country'] = isset($node->field_rfi_country['und'][0]['value']) ? $node->field_rfi_country['und'][0]['value'] : '';
         $upost['start_date'] = $node->field_rfi_start_term_code['und'][0]['value'];
         $upost['military'] = isset($node->field_rfi_veteran['und'][0]['value']) ? $node->field_rfi_veteran['und'][0]['value'] : '';
-        $upost['prog_plan'] = $node->field_rfi_program['und'][0]['value'];
+        $upost['program_code'] = isset($node->field_rfi_program['und'][0]['value']) ? $node->field_rfi_program['und'][0]['value'] : '';
         $upost['citizenship'] = isset($node->field_rfi_international['und'][0]['value']) ? $node->field_rfi_international['und'][0]['value'] : '';
         $upost['questions'] = isset($node->field_rfi_question['und'][0]['value']) ? $node->field_rfi_question['und'][0]['value'] : '';
         $upost['student_type'] = $node->field_rfi_student_type['und'][0]['value'];
-        $upost['zipcode'] = $node->field_rfi_zipcode['und'][0]['value'];
+        $upost['zipcode'] = isset($node->field_rfi_zipcode['und'][0]['value']) ? $node->field_rfi_zipcode['und'][0]['value'] : '';
         $upost['mobile_check'] = isset($node->field_rfi_sms_opted['und'][0]['value']) ? $node->field_rfi_sms_opted['und'][0]['value'] : '';
         $upost['submission_nodeid'] = $node->nid;
+        $utype_of_form = isset($node->field_rfi_form_type['und'][0]['value']) ? $node->field_rfi_form_type['und'][0]['value'] : '';
+        if($utype_of_form == "Undergraduate long form"){
+          $upost['type_of_form'] = 'LF';
+        }
+        if($utype_of_form == "Undergraduate multi form"){
+          $upost['type_of_form'] = 'MF';
+        }
+        
         asu_rfi_undergrad_post($upost);
         drupal_set_message('Posted to Middleware');
   }
@@ -1054,6 +1076,14 @@ function asu_rfi_bulk_submit_action(&$node, $context) {
         $gradpost['zipcode'] = isset($node->field_rfi_zipcode['und'][0]['value']) ? $node->field_rfi_zipcode['und'][0]['value'] : '';
         $gradpost['mobile_check'] = isset($node->field_rfi_sms_opted['und'][0]['value']) ? $node->field_rfi_sms_opted['und'][0]['value'] : '';
         $gradpost['submission_nodeid'] = $node->nid;
+        $type_of_form = isset($node->field_rfi_form_type['und'][0]['value']) ? $node->field_rfi_form_type['und'][0]['value'] : '';
+        if($type_of_form == "Graduate long form"){
+          $gradpost['type_of_form'] = 'LF';
+        }
+        if($type_of_form == "Graduate multi form"){
+          $gradpost['type_of_form'] = 'MF';
+        }
+        
         asu_rfi_grad_post($gradpost);
         drupal_set_message('Posted to Salesforce');
        }
