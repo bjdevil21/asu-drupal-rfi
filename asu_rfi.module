@@ -1132,6 +1132,7 @@ function asu_rfi_js_alter(&$javascript) {
 function asu_rfi_preprocess_page(&$variables) {
 
   //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the URL, load the node and get the variables. Add Google analytics code to the header. 
+  if(isset($variables['theme_hook_suggestions'][1])){
   if($variables['theme_hook_suggestions'][1] == "page__degree_programs__request_info_thank_you"){
     $nodeid = base64_decode(arg(2));
   
@@ -1181,7 +1182,7 @@ function asu_rfi_preprocess_page(&$variables) {
             }];
         })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
   }
-   
+  }
    //if confirmation node id specified in module settings page is called instead, run below code
    else
    {
