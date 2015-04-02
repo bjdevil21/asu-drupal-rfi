@@ -285,7 +285,6 @@ function asu_rfi_form_data($form, &$form_state) {
 		    ':input[name="country"]' => array('value' => 'United States'),
 		),
 	    ),
-	    '#required' => TRUE,
 	    '#default_value' => isset($_SESSION['rfi_data']['zipcode']) ?  $_SESSION['rfi_data']['zipcode'] : NULL,
 	);
    
