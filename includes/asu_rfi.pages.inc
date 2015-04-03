@@ -50,12 +50,13 @@ function asu_rfi_form_data($form, &$form_state) {
     drupal_add_js('jQuery(window).unload(function(){});', array('type' => 'inline'));  
       
      //if the session is set for more than 5 min, clear the session data
+     
     if(isset($_SESSION['rfi_data'])){
 	 $current_time = time();
 	 $session_start_time = $_SESSION['rfi_data']['start_time'];
 	 $session_diff = $current_time - $session_start_time;
 	
-	if($session_diff >= 300){
+	if($session_diff >= 120){
 	    unset($_SESSION['rfi_data']);
 	    unset($form_state['storage']);
 	     unset($form_state['values']);
@@ -285,6 +286,7 @@ function asu_rfi_form_data($form, &$form_state) {
 		    ':input[name="country"]' => array('value' => 'United States'),
 		),
 	    ),
+	    //'#required' => TRUE,
 	    '#default_value' => isset($_SESSION['rfi_data']['zipcode']) ?  $_SESSION['rfi_data']['zipcode'] : NULL,
 	);
    
@@ -406,11 +408,11 @@ function asu_rfi_form_data_validate($form, &$form_state) {
 
     //validate zip code
   
-    if(empty($zip)){
+    /*if(empty($zip)){
 	if(!empty($country) && ($country == "United States")){
 	    form_set_error('zipcode', t('Postal code field is required.'));
 	}
-    }
+    }*/
   
     if(!empty($zip)){
 	if($country == "United States"){
@@ -437,7 +439,7 @@ function asu_rfi_form_data_validate($form, &$form_state) {
     //validate birthdate
   
     if(!empty($birthdate)){ 
-	//get number of occurrences of '/' in dob
+	//get number of occurences of '/' in dob
 	$slashes = substr_count($birthdate, '/');
 	if($slashes == 2){
 	    $date_format = explode('/',$birthdate);
@@ -504,7 +506,7 @@ function asu_rfi_form_data_submit($form, &$form_state){
     $form_state['storage']['phone'] = $form_state['values']['phone'];
     $sms_opted = $form_state['values']['mobile_check'];
  
-    //check if the phone number already has 1 prepeneded. If yes, just pass phone number to sms field, else prepend 1.
+    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
     if(!empty($sms_opted)){
 	if(substr($form_state['values']['phone'], 0,1) != "1"){
 	    $form_state['storage']['mobile_check'] = '1'.$form_state['values']['phone'];
@@ -572,18 +574,6 @@ function asu_rfi_form_data_submit($form, &$form_state){
     //check if unique id exists in the database
     $node_unique = db_query('SELECT field_rfi_uniquedata_value FROM {field_data_field_rfi_uniquedata} WHERE field_rfi_uniquedata_value = :unid', array(':unid' => $uniqueid))->fetchField();
   
-    if(isset($_SESSION['rfi_data'])){
-	$current_time = time();
-	$session_start_time = $_SESSION['rfi_data']['start_time'];
-	$session_diff = $current_time - $session_start_time;
-	
-	if($session_diff >= 300){
-	    unset($_SESSION['rfi_data']);
-	    unset($form_state['storage']);
-	    unset($form_state['values']);
-	    drupal_set_message('Your session has expired, please fill out the form again.');
-	}
-	else{
 	    //if unique id doesn't exist, create the nodes
 	    if(empty($node_unique)){
 		$ent_values = array(
@@ -656,8 +646,7 @@ function asu_rfi_form_data_submit($form, &$form_state){
 		$form_state['storage']['submission_nodeid'] = $get_nodeid;
 		$form_state['storage']['step'] = 'asu_rfi_second_form';
 	    }
-	}
-    }
+
 }
 
 /** construct the second form **/
@@ -665,7 +654,7 @@ function asu_rfi_second_form($form, &$form_state){
     
     drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.js','file');
      // Add no-store in Cache-Control to clear all data when browser back button is clicked
-    drupal_add_http_header(
+   drupal_add_http_header(
 	'Cache-Control', 
 	'no-store, no-cache, must-revalidate, post-check=0, pre-check=0', 
 	FALSE
@@ -675,12 +664,12 @@ function asu_rfi_second_form($form, &$form_state){
     
     //If the form is in test mode, display test mode message
     drupal_add_css(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.css','file');
-    if(isset($_SESSION['rfi_data'])){
+   if(isset($_SESSION['rfi_data'])){
 	$current_time = time();
 	$session_start_time = $_SESSION['rfi_data']['start_time'];
 	$session_diff = $current_time - $session_start_time;
 	
-	if($session_diff >= 300){
+	if($session_diff >= 120){
 	    unset($_SESSION['rfi_data']);
 	    unset($form_state['values']);
 	    unset($form_state['storage']);
@@ -875,19 +864,8 @@ function asu_rfi_second_form_validate($form,&$form_state){
 
 /* Second form submit handler */
 function asu_rfi_second_form_submit($form, &$form_state){
-    //clear session after 5 minutes
-    if(isset($_SESSION['rfi_data'])){
-	$current_time = time();
-	$session_start_time = $_SESSION['rfi_data']['start_time'];
-	$session_diff = $current_time - $session_start_time;
-	
-	if($session_diff >= 300){
 	    unset($_SESSION['rfi_data']);
-	    unset($form_state['values']);
-	    unset($form_state['storage']);
-	    drupal_set_message(t('Your session has expired, please fill out the form again.'), 'error');
-	}
-	else{
+   
 	    $fname =  check_plain($form_state['storage']['first_name']);
 	    $lname = ucfirst(check_plain($fname));
 	    $lname = check_plain($form_state['storage']['last_name']);
@@ -962,7 +940,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
 	    $coded_college_code = base64_encode($form_state['storage']['college_code']);
 	    
 	    /*If graduate degree is submitted, root the from to graduate posting function.
-	     *Grab the node id of confirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
+	     *Grab the node id of cinfirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
 	     */
 	    if($form_state['storage']['prospect_level'] == "Graduate"){
 		asu_rfi_grad_post($form_state['storage']);
@@ -984,7 +962,7 @@ function asu_rfi_second_form_submit($form, &$form_state){
 	    }
 	    
 	    /*If undergraduate degree is submitted, root the from to undergraduate posting function below.
-	     *Grab the node id of confirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
+	     *Grab the node id of cinfirmation page from admin settings page if exists and redirect the user to confirmation node. If the node id doesn't exist, take the user to built in confirmation page*
 	     */
 	    if($form_state['storage']['prospect_level'] == "Undergraduate"){
 		asu_rfi_undergrad_post($form_state['storage']); //-- To be used in future
@@ -1004,9 +982,6 @@ function asu_rfi_second_form_submit($form, &$form_state){
 		}
 		unset($_SESSION['rfi_data']);
 	    }
-	    unset($_SESSION['rfi_data']);
-	}
-    }
 }
 
 
@@ -1052,6 +1027,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     }
     
     $form = array();
+    
     $form_mode = variable_get('asu_rfi_form_mode');
     if((variable_get('asu_rfi_form_mode') == "test") || empty($form_mode)){
 	$form['form_stage'] = array(
@@ -1064,7 +1040,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     if(empty($middleware_key)){
 	$form['form_middle_post'] = array(
 	'#type' => 'item',
-        '#markup' => t('<div class="rfi_middlekey">The middleware authentication key is currently not set, it is required to post data to middleware. You can request the key from <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a> and add the key provided at the <a href="/admin/config/asu/asurfi">RFI admin settings page</a></div>')
+        '#markup' => t('<div class="rfi_middlekey">The middleware authentication key is currently not set, it is required to post data to middleware. You can request the key fron <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a> and add the key provided at the <a href="/admin/config/asu/asurfi">RFI admin settings page</a></div>')
         );
     }
     
@@ -1311,12 +1287,14 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
 	'#default_value' => 'LF',
     );
     
+    
     $form['submit'] = array(
 	'#type' => 'submit',
 	'#value' => t('Request info'),
 	'#attributes' =>  array('class' => array('rfi_button')),
     );
     return $form;
+    
 }
  
 
@@ -1324,7 +1302,6 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
 /* Function to validate submitted values*/
 
 function asu_rfi_long_form_data_validate($form,&$form_state){
-   
     $stype = $form_state['values']['student_type'];
     $fname = $form_state['values']['first_name'];
     $fname = ucfirst($fname);
@@ -1404,7 +1381,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
    //validate birthdate
   
    if(!empty($birthdate)){ 
-	//get number of occurrences of '/' in dob
+	//get number of occurences of '/' in dob
 	$slashes = substr_count($birthdate, '/');
 	if($slashes == 2){
 	    $date_format = explode('/',$birthdate);
@@ -1469,6 +1446,7 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
 
 /* submit handler */
 function asu_rfi_long_form_data_submit($form, &$form_state){
+   
    global $user;
  
     //Get the type of the form. If the form is grad form, set prospect_level value to "Graduate", else "Undergraduate"
@@ -1492,7 +1470,7 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
     
     $sms_opted = $form_state['values']['mobile_check'];
   
-    //check if the phone number already has 1 prepeneded. If yes, just pass phone number to sms field, else prepend 1.
+    //check if the phone number already has 1 prepeneded. If yes, just pass phome number to sms field, else prepend 1.
     if(!empty($sms_opted)){
 	if(substr($form_state['values']['phone'], 0,1) != "1"){
 	  $form_state['values']['mobile_check'] = '1'.$form_state['values']['phone'];
@@ -1911,7 +1889,7 @@ function asu_rfi_states_data(){
 //Function to build start dates options array
 function _asu_rfi_sem_dates(){
     
-    //Get semester dates from database
+    //Get semester dates from dabatase
     $semdates_query = db_query("select * from {asu_rfi_sem_dates} order by CHAR_LENGTH(semId)");
     foreach($semdates_query as $semester){
 	$termdate[$semester->semId] = $semester->semLabel;
