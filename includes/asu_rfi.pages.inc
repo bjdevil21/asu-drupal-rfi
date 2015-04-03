@@ -286,7 +286,6 @@ function asu_rfi_form_data($form, &$form_state) {
 		    ':input[name="country"]' => array('value' => 'United States'),
 		),
 	    ),
-	    //'#required' => TRUE,
 	    '#default_value' => isset($_SESSION['rfi_data']['zipcode']) ?  $_SESSION['rfi_data']['zipcode'] : NULL,
 	);
    
@@ -408,11 +407,11 @@ function asu_rfi_form_data_validate($form, &$form_state) {
 
     //validate zip code
   
-    /*if(empty($zip)){
+    if(empty($zip)){
 	if(!empty($country) && ($country == "United States")){
 	    form_set_error('zipcode', t('Postal code field is required.'));
 	}
-    }*/
+    }
   
     if(!empty($zip)){
 	if($country == "United States"){
