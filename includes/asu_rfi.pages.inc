@@ -87,15 +87,15 @@ function asu_rfi_form_data($form, &$form_state) {
   $country = asu_rfi_countries_data();
     $node = menu_get_object();
     if(!empty($node)){
-	if(!empty($node->field_asu_academic_plan[LANGUAGE_NONE][0]['value'])){
-	    $dcode = $node->field_asu_academic_plan[LANGUAGE_NONE][0]['value'];
+	if(!empty($node->field_asu_academic_plan['und'][0]['value'])){
+	    $dcode = $node->field_asu_academic_plan['und'][0]['value'];
 	}
 	else{
 	    $dcode = '';
 	}
     
-        if(!empty($node->field_asu_degree_awarded[LANGUAGE_NONE][0]['value'])){
-          $dname = $node->field_asu_degree_awarded[LANGUAGE_NONE][0]['value'];
+        if(!empty($node->field_asu_degree_awarded['und'][0]['value'])){
+          $dname = $node->field_asu_degree_awarded['und'][0]['value'];
 	}
 	else{
 	    $dname = '';
@@ -103,20 +103,20 @@ function asu_rfi_form_data($form, &$form_state) {
     $degree[$dcode] = $dname;
     
     
-    if(!empty($node->field_asu_degree_program[LANGUAGE_NONE][0]['value'])){
-	$type_degree = $node->field_asu_degree_program[LANGUAGE_NONE][0]['value'];
+    if(!empty($node->field_asu_degree_program['und'][0]['value'])){
+	$type_degree = $node->field_asu_degree_program['und'][0]['value'];
     }
     else{
 	$type_degree = '';
     }
     if(!empty($node->field_asu_academic_program)){
-	$college_code = $node->field_asu_academic_program[LANGUAGE_NONE][0]['value'];
+	$college_code = $node->field_asu_academic_program['und'][0]['value'];
     }
     else{
 	$college_code = "None";
     }
     if(!empty($node->field_asu_diploma_description)){
-	$college_name = $node->field_asu_diploma_description[LANGUAGE_NONE][0]['value'];
+	$college_name = $node->field_asu_diploma_description['und'][0]['value'];
     }
     else{
 	$college_name = '';
@@ -939,14 +939,14 @@ function asu_rfi_second_form_submit($form, &$form_state){
    $current_time = time();
    $node = node_load($node_entity_id);
    
-   $node->field_rfi_state[LANGUAGE_NONE][0]['value'] = $state;
-   $node->field_rfi_veteran[LANGUAGE_NONE][0]['value'] = $veteran;
-   $node->field_rfi_question[LANGUAGE_NONE][0]['value'] = check_plain($questions);
-   $node->field_rfi_submission_status[LANGUAGE_NONE][0]['value'] = 'Complete';
-   $node->field_rfi_address[LANGUAGE_NONE][0]['value'] = $address;
-   $node->field_rfi_city[LANGUAGE_NONE][0]['value'] = $city;
-   $node->field_rfi_international[LANGUAGE_NONE][0]['value'] = $international;
-   $node->field_rfi_zipcode[LANGUAGE_NONE][0]['value'] = $zipcode;
+   $node->field_rfi_state['und'][0]['value'] = $state;
+   $node->field_rfi_veteran['und'][0]['value'] = $veteran;
+   $node->field_rfi_question['und'][0]['value'] = check_plain($questions);
+   $node->field_rfi_submission_status['und'][0]['value'] = 'Complete';
+   $node->field_rfi_address['und'][0]['value'] = $address;
+   $node->field_rfi_city['und'][0]['value'] = $city;
+   $node->field_rfi_international['und'][0]['value'] = $international;
+   $node->field_rfi_zipcode['und'][0]['value'] = $zipcode;
    
    node_save($node);
    
@@ -2004,8 +2004,8 @@ function _asu_rfi_program(){
     $program = array();
     $node = menu_get_object();
     $dcode = $node->title;
-    $dname = $node->field_asu_degree_awarded[LANGUAGE_NONE][0]['value'];
-    $college_code = $node->field_asu_academic_plan[LANGUAGE_NONE][0]['value'];
+    $dname = $node->field_asu_degree_awarded['und'][0]['value'];
+    $college_code = $node->field_asu_academic_plan['und'][0]['value'];
     $program[$dcode] = $dname;
    
     return $program;
