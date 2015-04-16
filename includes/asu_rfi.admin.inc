@@ -33,7 +33,7 @@ function asu_rfi_admin_settings($form_state){
     '#options' => $form_modes,
     '#default_value' => variable_get('asu_rfi_form_mode'),
     '#attributes' => array('class' => array('asu_rfi_admin_field')),
-    '#description' => t("Specify if the forms are in Test mode or Live mode. Note: This is a sitewide configuration and will affect all forms."),
+    '#description' => t("Specify if the forms are in Test mode or Live mode. Note: This is a sitewide configuration and will affect all forms. Only site admins can view the forms if they are in Test mode."),
     '#required' => TRUE,
     );
    

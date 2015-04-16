@@ -69,22 +69,10 @@ function asu_rfi_menu() {
     'file' => 'includes/asu_rfi.pages.inc',
    );
    
-   //ASU modules settings
-   $items['admin/config/asu'] = array(
-  'title' => 'ASU modules',
-  'description' => 'Configure ASU modules.',
-  'position' => 'left',
-   'weight' => -30,
-  'page callback' => 'system_admin_menu_block_page',
-  'access arguments' => array('access administration pages'),
-  'file' => 'system.admin.inc',
-  'file path' => drupal_get_path('module', 'system'),
-  );
-   
    // request info form admin settings page  
-  $items['admin/config/asu/asurfi'] = array(
-    'title' => 'ASU Request Info form module settings',
-    'description' => t('Request Info form module settings'),
+  $items['admin/config/content/asurfi'] = array(
+    'title' => 'Content Authoring',
+    'description' => t('ASU RFI Form Settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('asu_rfi_admin_settings'),
     'access arguments' => array('access administration pages'),
@@ -675,7 +663,7 @@ function asu_rfi_repost_rfi($data) {
           $gradpost['type_of_form'] = 'MF';
         }
         asu_rfi_grad_post($gradpost);
-        watchdog('SF grad posting', "Posted successfully to ".$data->nid);
+        //watchdog('SF grad posting', "Posted successfully to ".$data->nid);
         variable_set('last_attempt_SF_posting', time());
         
        }
@@ -708,7 +696,7 @@ function asu_rfi_repost_rfi($data) {
           $upost['type_of_form'] = 'MF';
         }
         asu_rfi_undergrad_post($upost);
-        watchdog('SF undergrad posting', "Posted successfully to ".$data->nid);
+        //watchdog('SF undergrad posting', "Posted successfully to ".$data->nid);
         variable_set('last_attempt_SF_posting', time());
         
        }
@@ -764,6 +752,7 @@ function asu_rfi_form_alter(&$form, &$form_state, $form_id){
     if(isset($form['#prefix'])){
       if($form['#prefix'] == '<div id="rfi_second_form">'){
         drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.js','file');
+        drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/session_clear.js','file');
       }
     }
     
@@ -773,8 +762,20 @@ function asu_rfi_form_alter(&$form, &$form_state, $form_id){
     }
     
     if($form['#id'] == "asu-rfi-form-data"){
-      $form['#after_build'][] = 'asu_rfi_form_after_build';
+      /*  $meta_ie_render_engine = array(
+            '#type' => 'html_tag',
+            '#tag' => 'meta',
+            '#attributes' => array(
+                'content' =>  '1800;url=/',
+                'http-equiv' => 'refresh',
+              )
+        );
+  
+        // Add header meta tag for IE to head
+      drupal_add_html_head($meta_ie_render_engine, 'meta_ie_render_engine');*/
+       drupal_add_js("(function ($) { $(window).on('unload', function(){ $('#asu-rfi-form-data').trigger('reset'); }) })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
       drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/session_clear.js','file');
+      $form['#after_build'][] = 'asu_rfi_form_after_build';
     }
     
    
@@ -1053,7 +1054,6 @@ function asu_rfi_bulk_submit_action(&$node, $context) {
         if($utype_of_form == "Undergraduate multi form"){
           $upost['type_of_form'] = 'MF';
         }
-        
         asu_rfi_undergrad_post($upost);
         drupal_set_message('Posted to Middleware');
   }
@@ -1084,7 +1084,6 @@ function asu_rfi_bulk_submit_action(&$node, $context) {
         if($type_of_form == "Graduate multi form"){
           $gradpost['type_of_form'] = 'MF';
         }
-        
         asu_rfi_grad_post($gradpost);
         drupal_set_message('Posted to Salesforce');
        }
@@ -1131,7 +1130,7 @@ function asu_rfi_js_alter(&$javascript) {
 
 //function to send data transaction variable SI_dataLayer to GTM tag
 /*function asu_rfi_preprocess_page(&$variables) {
-
+  
   //Check if /degree-programs/request-info-thank-you is loaded, grad the node id from the URL, load the node and get the variables. Add Google analytics code to the header. 
   if(isset($variables['theme_hook_suggestions'][1])){
   if($variables['theme_hook_suggestions'][1] == "page__degree_programs__request_info_thank_you"){
@@ -1172,18 +1171,18 @@ function asu_rfi_js_alter(&$javascript) {
        SI_dataLayer = [{
           'transactionId': '$ga_id',
           'transactionAffiliation': '$program_name',
-          'transactionTotal': 100.00, 
+          'transactionTotal': '100.00', 
           'transactionProducts': [{
                 'sku': '$sku', 
                 'name': '$college',  
                 'category': '$category',
-                'price': 100.00, 
-                'quantity': 1
+                'price': '100.00', 
+                'quantity': '1'
               }]
             }];
         })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
   }
-  }
+  } 
    //if confirmation node id specified in module settings page is called instead, run below code
    else
    {
@@ -1212,8 +1211,8 @@ function asu_rfi_js_alter(&$javascript) {
                'sku': '$sku', 
                'name': '$major_rfi', 
                'category': '$category',
-               'price': 100.00, 
-               'quantity': 1
+               'price': '100.00', 
+               'quantity': '1'
              }]
         }];
       })(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));

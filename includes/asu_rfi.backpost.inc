@@ -24,7 +24,7 @@ function asu_rfi_success_post($hash, $nid)
 }
 
 
-/* Failed posts submissions update */
+/* Fialed posts submissions update */
 
 function asu_rfi_fail_post($hash, $nid)
 {
@@ -83,12 +83,11 @@ function asu_rfi_test_post($hash, $nid)
 
 /* The function to save middleware key in the admin settings page App key field */
 function asu_rfi_middle_key($key){
-    //Check if middleware key is already set. If set, don't update the key, else set the variable with key value
+    //Check if middleware key is already set. If set, don't update the key, else set the varable with key value
     global $conf;
- 
+    
     if(empty($conf['asu_rfi_form_auth_key'])){
         $middle_key = base64_decode($key);
         variable_set('asu_rfi_form_auth_key', $middle_key);
     }
-
 }

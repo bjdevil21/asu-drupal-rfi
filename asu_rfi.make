@@ -1,4 +1,4 @@
-; ASU RFI make file
+; ASU RFI makefile
 
 api = 2
 core = 7.x
@@ -20,6 +20,10 @@ projects[views_data_export][subdir] = contrib
 projects[mimemail][version] = 1.0-beta3
 projects[mimemail][type] = module
 projects[mimemail][subdir] = contrib
+
+projects[honeypot][version] = 1.17
+projects[honeypot][type] = module
+projects[honeypot][subdir] = contrib
 
 ; pre-req for mimemail
 projects[mailsystem][version] = 2.34

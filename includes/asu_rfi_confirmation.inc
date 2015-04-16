@@ -34,10 +34,16 @@ function asu_rfi_confirmation($nid){
     $sku = $program_code.$plan_code.'-RFI';
     $ga_id = variable_get('asu_rfi_google_analytics_key').'-'.$nid ;
     
+    //Build array to be used in google analytics coding
+    $trans = array('id'=>$ga_id, 'affiliation'=>$program_name,
+                'revenue'=>'100');
+    
+    $items = array('sku'=>$sku, 'name'=>$college, 'category'=>'RFI', 'price'=>'100', 'quantity'=>'1');
+   
     $confirm_message = "<div style='padding:8% 0 8% 0;'>Thank you for your interest in ASU. An ASU representative will contact you soon!</div>";
    
  
-    //GTM transaction variables. Moved this code to .module file
+    //GTM transaction variables
     //drupal_add_js("(function ($) {  SI_dataLayer.push({ 'ecommerce': { 'purchase': { 'actionField': { 'transactionId': '$ga_id', 'transactionAffiliation': '$program_name','revenue': '100', }, 'transactionProducts': [{ 'sku':'$sku','name': '$college', 'id': '$ga_id', 'price': '100','quantity': '1',}]}}})})(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));
     
     //drupal_add_js("(function ($) { window.SI_dataLayer = window.SI_dataLayer || []; SI_dataLayer.push({'transactionId': '$ga_id', 'transactionAffiliation': '$program_name', 'transactionTotal': 100.00,'transactionProducts': ({'sku': '$sku', 'name': '$college','price': '100.00','quantity': '1'})})})(jQuery)", array('type' => 'inline', 'scope' => 'header','weight' => 0));

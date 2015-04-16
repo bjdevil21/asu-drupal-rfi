@@ -48,22 +48,8 @@ function asu_rfi_form_data($form, &$form_state) {
     );
     // Hack for Safari
     drupal_add_js('jQuery(window).unload(function(){});', array('type' => 'inline'));  
-      
-     //if the session is set for more than 5 min, clear the session data
-     
-    if(isset($_SESSION['rfi_data'])){
-	 $current_time = time();
-	 $session_start_time = $_SESSION['rfi_data']['start_time'];
-	 $session_diff = $current_time - $session_start_time;
-	
-	if($session_diff >= 120){
-	    unset($_SESSION['rfi_data']);
-	    unset($form_state['storage']);
-	     unset($form_state['values']);
-	    drupal_set_message('Your session has expired, please fill out the form again.');
-	}
-    }
-    $form = array();
+   
+    
     if(isset($form_state['storage'])){
 	
         if($form_state['storage']['step'] == 'asu_rfi_second_form'){
@@ -118,7 +104,27 @@ function asu_rfi_form_data($form, &$form_state) {
 	   $college_name = '';
         }
     
-   
+	 $form = array();
+    
+	 honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));  
+    
+	 //if the session is set for more than 5 min, clear the session data
+	if(isset($_SESSION['rfi_data'])){
+	    $current_time = time();
+	    $session_start_time = $_SESSION['rfi_data']['start_time'];
+	    $session_diff = $current_time - $session_start_time;
+	
+	    if($session_diff >= 180){
+		unset($_SESSION['rfi_data']);
+		unset($form_state['storage']);
+		unset($form_state['values']);
+		// drupal_set_message('Your session has expired, please fill out the form again.');
+		$form['sess_expire_message'] = array(
+		    '#type' => 'item',
+		    '#markup' => '<div class="alert-danger" style="padding:2%;">Your session has expired, please fill out the form again.</div>',
+		);
+	    }
+	}
 	$form_mode = variable_get('asu_rfi_form_mode');
 	if(($form_mode == "test") || (empty($form_mode))){
 	    $form['form_stage'] = array(
@@ -445,25 +451,58 @@ function asu_rfi_form_data_validate($form, &$form_state) {
 	    $month = $date_format[0];
 	    $day = $date_format[1];
 	    $year = $date_format[2];
+	    $current_year = date('Y');
+	    $year_limit = $current_year - 1;
+	    $isLeapYear = date("L");
+    
 	    if(strlen($birthdate) < 11){
 		if(($month < 1) || ($month > 12)){
 		    form_set_error('birthdate', t('Month range has to be between 1 and 12.'));
 		    form_set_error('dob_field',t(' '));
 		}
-    
-		if(($day < 1) || ($day > 31)){
-		    form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month.'));
-		    form_set_error('dob_field',t(' '));
+		
+		if(($month == 1) || ($month == 3) || ($month == 5) || ($month == 7) || ($month == 8) || ($month == 10) || ($month == 12)){
+		    if(($day < 1) || ($day > 31)){
+			form_set_error('birthdate', t('Date range has to be between 1 and 31.'));
+			form_set_error('dob_field',t(' '));
+		    }
 		}
-   
+		
+		if(($month == 4) || ($month == 6) || ($month == 9) || ($month == 11)){
+		    if(($day < 1) || ($day > 30)){
+			form_set_error('birthdate', t('Date range has to be between 1 and 30.'));
+			form_set_error('dob_field',t(' '));
+		    }
+		}
+		
+		if($month == 2) {
+		    if($isLeapYear == 1){
+			if(($day < 1) || ($day > 29)){
+			    form_set_error('birthdate', t('Date range has to be between 1 and 29.'));
+			    form_set_error('dob_field',t(' '));
+			}
+		    }
+		    if($isLeapYear == 0){
+			if(($day < 1) || ($day > 28)){
+			    form_set_error('birthdate', t('Date range has to be between 1 and 28.'));
+			    form_set_error('dob_field',t(' '));
+			}
+		    }
+		}
+		
 		if(strlen($year) != 4){
 		    form_set_error('birthdate', t('Year has to be 4 digits.'));
+		}
+		
+		if($year > $year_limit){
+		    form_set_error('birthdate', t('Year cannot be greater than '.$year_limit));
 		}
     
 		if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
 		    form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy.'));
 		    form_set_error('dob_field',t(' '));
 		}
+		
 	    }
 	    else{
 		form_set_error('birthdate', t('Date of birth is invalid, it accepts the format mm/dd/yyyy.'));
@@ -650,10 +689,17 @@ function asu_rfi_form_data_submit($form, &$form_state){
 
 /** construct the second form **/
 function asu_rfi_second_form($form, &$form_state){
-    
+   
+    $current_time = time();
+    $session_start_time = $_SESSION['rfi_data']['start_time'];
+    $session_diff = $current_time - $session_start_time;
+    if($session_diff >= 180){
+	unset($form_state['storage']);
+    }
+   
     drupal_add_js(drupal_get_path('module', 'asu_rfi') .'/theme/asu_rfi.js','file');
      // Add no-store in Cache-Control to clear all data when browser back button is clicked
-   drupal_add_http_header(
+    drupal_add_http_header(
 	'Cache-Control', 
 	'no-store, no-cache, must-revalidate, post-check=0, pre-check=0', 
 	FALSE
@@ -668,16 +714,21 @@ function asu_rfi_second_form($form, &$form_state){
 	$session_start_time = $_SESSION['rfi_data']['start_time'];
 	$session_diff = $current_time - $session_start_time;
 	
-	if($session_diff >= 120){
+	if($session_diff >= 180){
 	    unset($_SESSION['rfi_data']);
 	    unset($form_state['values']);
 	    unset($form_state['storage']);
-	    drupal_set_message(t('Your session has expired, please fill out the form again'), 'error');
+	   // drupal_set_message(t('Your session has expired, please fill out the form again'), 'error');
+	    $form['sess_expire_message'] = array(
+	    '#type' => 'item',
+	    '#markup' => '<div class="alert-danger" style="padding:2%;">Your session has expired, please fill out the form again.</div>',
+	   );
 	    $form_state['storage']['step'] = 'asu_rfi_form_data';
 	}
     }
    
     $states = asu_rfi_states_data();
+    honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
     $form['#id'] = 'asu_rfi_second_form';
     $form['#prefix'] = '<div id="rfi_second_form">';
     $form['#suffix'] = '</div>';
@@ -1027,6 +1078,8 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     
     $form = array();
     
+    honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
+    
     $form_mode = variable_get('asu_rfi_form_mode');
     if((variable_get('asu_rfi_form_mode') == "test") || empty($form_mode)){
 	$form['form_stage'] = array(
@@ -1035,13 +1088,13 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
         );
     }
     
-    $middleware_key = variable_get('asu_rfi_form_auth_key',NULL);
+    /*$middleware_key = variable_get('asu_rfi_form_auth_key',NULL);
     if(empty($middleware_key)){
 	$form['form_middle_post'] = array(
 	'#type' => 'item',
         '#markup' => t('<div class="rfi_middlekey">The middleware authentication key is currently not set, it is required to post data to middleware. You can request the key fron <a href="https://webforms.asu.edu/content/access-rfi-middleware-request">here</a> and add the key provided at the <a href="/admin/config/asu/asurfi">RFI admin settings page</a></div>')
         );
-    }
+    }*/
     
     $form['req_header_text'] = array(
         '#value' => '<h4>Please complete and submit the form below, and a representative will contact you about enrolling at ASU</h4>'
@@ -1387,18 +1440,53 @@ function asu_rfi_long_form_data_validate($form,&$form_state){
 	    $month = $date_format[0];
 	    $day = $date_format[1];
 	    $year = $date_format[2];
+	    $current_year = date('Y');
+	    $year_limit = $current_year - 1;
+	    $isLeapYear = date('L');
 	    if(strlen($birthdate) < 11){
+		
 		if(($month < 1) || ($month > 12)){
 		    form_set_error('birthdate', t('Month range has to be between 1 and 12.'));
 		    form_set_error('dob_field',t(' '));
 		}
-		if(($day < 1) || ($day > 31)){
-		    form_set_error('birthdate', t('Date range has to be between 1 and 30/31 depending on month.'));
-		    form_set_error('dob_field',t(' '));
+		
+		if(($month == 1) || ($month == 3) || ($month == 5) || ($month == 7) || ($month == 8) || ($month == 10) || ($month == 12)){
+		    if(($day < 1) || ($day > 31)){
+			form_set_error('birthdate', t('Date range has to be between 1 and 31.'));
+			form_set_error('dob_field',t(' '));
+		    }
 		}
+		
+		if(($month == 4) || ($month == 6) || ($month == 9) || ($month == 11)){
+		    if(($day < 1) || ($day > 30)){
+			form_set_error('birthdate', t('Date range has to be between 1 and 30.'));
+			form_set_error('dob_field',t(' '));
+		    }
+		}
+		
+		if($month == 2) {
+		    if($isLeapYear == 1){
+			if(($day < 1) || ($day > 29)){
+			    form_set_error('birthdate', t('Date range has to be between 1 and 29.'));
+			    form_set_error('dob_field',t(' '));
+			}
+		    }
+		    if($isLeapYear == 0){
+			if(($day < 1) || ($day > 28)){
+			    form_set_error('birthdate', t('Date range has to be between 1 and 28.'));
+			    form_set_error('dob_field',t(' '));
+			}
+		    }
+		}
+		
 		if(strlen($year) != 4){
 		    form_set_error('birthdate', t('Year has to be 4 digits.'));
 		}
+		
+		if($year > $year_limit){
+		    form_set_error('birthdate', t('Year cannot be greater than '.$year_limit));
+		}
+		
 		if(!preg_match("/^(0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])[\-\/.](19|20)\d\d$/", $birthdate)){
 		    form_set_error('birthdate', t('Date of birth accepts the format mm/dd/yyyy.'));
 		    form_set_error('dob_field',t(' '));
@@ -1453,8 +1541,6 @@ function asu_rfi_long_form_data_submit($form, &$form_state){
 	$stype = 'Graduate';
 	$long_form_type = "Graduate long form";
 	$form_state['values']['prospect_level'] = "Graduate";
-	//Set session variables only for grad students so that if Salesforce sends error message, users will have submitted data
-	// $_SESSION['rfi_data'] = $form_state['values'];
     }
     else{
 	$stype = $form_state['values']['student_type'];
@@ -1648,6 +1734,7 @@ function asu_rfi_current_form_data($form, &$form_state, $programs, $form_type){
    
 
     $form = array();
+    honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));  
     $form_mode = variable_get('asu_rfi_form_mode');
     if((variable_get('asu_rfi_form_mode') == "test") || empty($form_mode)){
      $form['form_stage'] = array(

@@ -25,7 +25,7 @@ function asu_rfi_undergrad_post($data)
     $domain = $_SERVER['HTTP_HOST'];
     $source = $domain.'-'.$type_of_form.'-UG';
   
-    //mobile phone
+    //modile phone
     if(isset($data['mobile_check'])){
         $mobile = str_replace('-', '', $data['mobile_check']);
     }
@@ -104,7 +104,7 @@ function asu_rfi_undergrad_post($data)
    }
    else
    {*/
-    $url = "https://webforms.asu.edu/asu_rfi_dedupe/submit_rfi/$hashkey/$nodeid";
+     $url = "https://webforms-qa.asu.edu/asu_rfi_dedupe/submit_rfi/$hashkey/$nodeid";
   //}
   
   

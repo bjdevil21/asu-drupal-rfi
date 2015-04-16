@@ -2,7 +2,39 @@
     Drupal.behaviors.asu_rfi_disbutton = {
         attach: function (context, settings) {
             
-           //Code to hide empty date of birth li alert text
+         
+            
+         setTimeout(function() {
+           
+            var fname = $('#edit-first-name').val();
+           //  alert(fname.length);
+               
+            if (fname.length > 0) {
+                 window.location=window.location;
+                $("#asu-rfi-form-data")[0].reset();
+                $("#asu_rfi_second_form")[0].reset();
+                $('#asu-rfi-long-form-data')[0].reset();
+            }
+               
+            },180000);
+         
+            /* function autoRefresh1()
+            {
+	        window.location.reload();
+                $("#asu-rfi-form-data")[0].reset();
+                $("#asu_rfi_second_form")[0].reset();
+                $('#asu-rfi-long-form-data')[0].reset();
+            }
+            setInterval('autoRefresh1()', 180000); */
+         
+            $(window).bind("pageshow", function() {
+               // let the browser natively reset defaults
+               $('#asu-rfi-form-data').reset();
+               $('#asu_rfi_second_form').reset();
+            })
+         
+          
+            //Code to hide empty date of birth li alert text
             if($('#asu-rfi-long-form-data').length || $('#asu-rfi-form-data').length){
                 if  ($('.alert-block').length) {
                    
@@ -25,7 +57,7 @@
                 var phone = $('#edit-phone').val();
                 var country = $('#rfi-country').val();
                 var dob = $('#edit-birthdate').val();
-               
+                
                 if (dob == '') {
                     $('#edit-dob-field label').css('padding-left', '2em');
                 }
@@ -48,19 +80,34 @@
             });
             
             /* reset the form fields on browser back button page load*/
+            $('#asu-rfi-form-data').submit(function(){
+                $(window).on('unload', function(){
+                   $('#asu-rfi-form-data')[0].reset();
+                  // $('#asu_rfi_second_form').trigger("reset");
+                });
+               
+            
+            })
+            
             $('#asu_rfi_second_form').submit(function(){
                 $(window).on('unload', function(){
-                    $('#asu-rfi-form-data').trigger("reset");
+                   $('#asu-rfi-form-data')[0].reset();
+                   $('#asu_rfi_second_form').trigger("reset");
                 });
+               
+            
             })
+            
             
             //Add css to date of birth field
             $('#asu-rfi-form-data').submit(function(){
                 var dobdata = $('#edit-birthdate').val();
                 if (dobdata == ''){
-                    $('#edit-dob-field label').css('padding-left', '1em');
+                    $('#edit-dob-field label').css('padding-left', '2em');
                 }
             })
+            
+            
         }
     }
 })
