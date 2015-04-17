@@ -129,7 +129,7 @@ function asu_rfi_form_data($form, &$form_state) {
 	if(($form_mode == "test") || (empty($form_mode))){
 	    $form['form_stage'] = array(
 		'#type' => 'item',
-		'#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/asu/asurfi">admin settings page</a></div>')
+		'#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/content/asurfi">admin settings page</a></div>')
 	    );
 	}
     
@@ -1084,7 +1084,7 @@ function asu_rfi_long_form_data($form, &$form_state, $programs, $form_type){
     if((variable_get('asu_rfi_form_mode') == "test") || empty($form_mode)){
 	$form['form_stage'] = array(
 	    '#type' => 'item',
-	    '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/asu/asurfi">admin settings page</a></div>')
+	    '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/content/asurfi">admin settings page</a></div>')
         );
     }
     
@@ -1739,7 +1739,7 @@ function asu_rfi_current_form_data($form, &$form_state, $programs, $form_type){
     if((variable_get('asu_rfi_form_mode') == "test") || empty($form_mode)){
      $form['form_stage'] = array(
 	'#type' => 'item',
-        '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/asu/asurfi">admin settings page</a></div>')
+        '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/content/asurfi">admin settings page</a></div>')
         );
     } 
     $form['req_header_text'] = array(
