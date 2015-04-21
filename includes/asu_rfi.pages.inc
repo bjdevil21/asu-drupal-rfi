@@ -736,7 +736,7 @@ function asu_rfi_second_form($form, &$form_state){
     if(($form_mode == "test") || (empty($form_mode))){
 	$form['form_stage'] = array(
 	    '#type' => 'item',
-	    '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/asu/asurfi">admin settings page</a></div>')
+	    '#markup' => t('<div class="rfi_test_mode">The form is in test mode, you can change the mode in <a href="/admin/config/content/asurfi">admin settings page</a></div>')
 	);
     }
    
