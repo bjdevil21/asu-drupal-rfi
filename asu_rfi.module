@@ -71,8 +71,8 @@ function asu_rfi_menu() {
    
    // request info form admin settings page  
   $items['admin/config/content/asurfi'] = array(
-    'title' => 'Content Authoring',
-    'description' => t('ASU RFI Form Settings'),
+    'title' => 'ASU RFI Form Settings',
+    'description' => t('Administer RFI form settings.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('asu_rfi_admin_settings'),
     'access arguments' => array('access administration pages'),
