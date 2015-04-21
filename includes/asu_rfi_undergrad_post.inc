@@ -104,7 +104,7 @@ function asu_rfi_undergrad_post($data)
    }
    else
    {*/
-     $url = "https://webforms-qa.asu.edu/asu_rfi_dedupe/submit_rfi/$hashkey/$nodeid";
+     $url = "https://webforms.asu.edu/asu_rfi_dedupe/submit_rfi/$hashkey/$nodeid";
   //}
   
   
