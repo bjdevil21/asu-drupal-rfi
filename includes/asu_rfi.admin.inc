@@ -11,7 +11,7 @@ function asu_rfi_admin_settings($form_state){
   
   $form = array();
   
-  $form_modes = array('test'=>'Test','live'=>'Production');
+  $form_modes = array('test'=>'Test','prod'=>'Production');
   
    $form['form_stage'] = array(
 	'#type' => 'item',
