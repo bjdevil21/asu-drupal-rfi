@@ -260,6 +260,13 @@ function asu_rfi_feature_views_default_views() {
       'empty_column' => 0,
     ),
   );
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['area']['id'] = 'area';
+  $handler->display->display_options['empty']['area']['table'] = 'views';
+  $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = TRUE;
+  $handler->display->display_options['empty']['area']['content'] = '<p>0 Results Found</p>';
+  $handler->display->display_options['empty']['area']['format'] = 'full_html';
   /* Field: Content: First name */
   $handler->display->display_options['fields']['field_rfi_first_name']['id'] = 'field_rfi_first_name';
   $handler->display->display_options['fields']['field_rfi_first_name']['table'] = 'field_data_field_rfi_first_name';
