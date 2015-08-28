@@ -408,7 +408,7 @@ function asu_rfi_cron() {
     //update countries
     $ctype = 'fieldinfo';
     $cname = 'country';
-  $curl = "https://webforms.asu.edu/asu_salesforce_query/api/$ctype/$cname";
+  $curl = "https://webforms.asu.edu/salesforce_query/api/$ctype/$cname";
   try 
   {
     $c_ch = curl_init();
@@ -455,7 +455,7 @@ function asu_rfi_cron() {
     //update states
     $type = 'fieldinfo';
     $name = 'state_province';
-    $url = "https://webforms.asu.edu/asu_salesforce_query/api/$type/$name";
+    $url = "https://webforms.asu.edu/salesforce_query/api/$type/$name";
 
     $ch = curl_init();
     $options = array(
@@ -485,7 +485,7 @@ function asu_rfi_cron() {
     //update asu_rfi_sem_dates
   $semtype = 'select';
   $semname = 'rfi_dedupe_list_terms';
-  $semurl = "https://webforms.asu.edu/asu_salesforce_query/api/$semtype/$semname";
+  $semurl = "https://webforms.asu.edu/salesforce_query/api/$semtype/$semname";
 
   $semfields = array(
     'condition_Term_Status__c' => TRUE,

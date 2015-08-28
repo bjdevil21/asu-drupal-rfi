@@ -10,7 +10,7 @@
   
   
   //$url = "https://$middleware_host/asu_salesforce_query/api/$type/$name";
-  $url = "https://webforms.asu.edu/asu_salesforce_query/api/$type/$name";
+  $url = "https://webforms.asu.edu/salesforce_query/api/$type/$name";
 
   $ch = curl_init();
   $options = array(
