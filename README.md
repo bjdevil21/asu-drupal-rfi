@@ -29,14 +29,14 @@ to the middleware and deploy the forms throughout your site.
 
 GENERAL CONFIGS: 
 
-General sitewide RFI settings are made at /admin/config/asu/asurfi.
+General site wide RFI settings are made at /admin/config/asu/asurfi.
 To use the middleware, you must obtain an authentication key from
 https://webforms.asu.edu/content/access-rfi-middleware-request
 If you deploy forms to your site without an authentication key configured,
 your site will collect lead submissions but not submit them to middleware.
 
 The Google Analytics identifier is a short string you choose yourself, and
-which will show up in ASU's Google Analytics reports, to help diffrentiate
+which will show up in ASU's Google Analytics reports, to help differentiate
 your entries from other sites.
 
 The Confirmation Web Page settings allows you to provide the Node ID (NID)
@@ -67,7 +67,7 @@ the site through that interface.
 
 Each RFI block instance has its own independent settings, configurable through
 Admin > Structure  > Blocks > [your block] Configure. It's here where you
-define which form type to use (multistep, undegraduate long form, graduate
+define which form type to use (multistep, undergraduate long form, graduate
 long form, current undergraduate form, current graduate form). Some of the
 form types automatically define which programs will be listed in the form
 while others allow you to manually determine the program options.
